@@ -5,7 +5,8 @@ require.config({
     underscore: 'vendor/underscore',
     backbone: 'vendor/backbone',
     handlebars: 'vendor/handlebars',
-    text: 'vendor/require-text'
+    text: 'vendor/require-text',
+    leaflet: 'vendor/leaflet'
   },
   // Underscore and Backbone are not AMD-capable per default,
   // so we need to use the AMD wrapping of RequireJS
@@ -21,7 +22,12 @@ require.config({
 
     handlebars: {
       exports: 'Handlebars'
+    },
+
+    leaflet: {
+      exports: 'L'
     }
+
   }
 });
 
