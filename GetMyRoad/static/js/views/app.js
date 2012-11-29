@@ -1,14 +1,19 @@
 define([
   'jquery',
   'underscore',
-  'backbone'
-], function($, _, Backbone) {
+  'backbone',
+
+  // Views:
+  'views/map'
+], function($, _, Backbone, MapView) {
 
   var AppView = Backbone.View.extend({
 
     Models: {},
     Collections: {},
-    Views: {},
+    Views: {
+      'map': new MapView()
+    },
 
     initialize: function() {
       console.log('working');
