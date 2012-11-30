@@ -8,7 +8,9 @@ require.config({
     text: 'vendor/require-text',
     leaflet: 'vendor/leaflet',
     csrf: 'vendor/csrf',
-    leafletPlugins: 'vendor/leafletPlugins'
+    leafletPlugins: 'vendor/leafletPlugins',
+    jquery_ui: 'vendor/jquery-ui-1.9.2.custom.min',
+    timepicker: 'vendor/timepicker'
   },
   // Underscore and Backbone are not AMD-capable per default,
   // so we need to use the AMD wrapping of RequireJS
@@ -34,7 +36,9 @@ require.config({
 
     'csrf': {
         deps: ['jquery']
-    }
+    },
+
+    timepicker: ['jquery_ui']
   }
 });
 

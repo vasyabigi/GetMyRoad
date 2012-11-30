@@ -7,7 +7,10 @@ define([
   'models/user',
 
   // Views:
-  'views/map'
+  'views/map',
+
+  'jquery_ui',
+  'timepicker'
 ], function($, _, Backbone, User, MapView) {
 
   var AppView = Backbone.View.extend({
@@ -21,7 +24,7 @@ define([
     },
 
     initialize: function() {
-        console.log('working');
+        this.$('.timepicker').datetimepicker();
     }
 
   });

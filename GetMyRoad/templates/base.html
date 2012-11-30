@@ -12,6 +12,7 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
 
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui-1.9.2.custom.min.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/leaflet.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/leafletPlugins.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.min.css">
@@ -29,8 +30,14 @@
         <div class="container">
             <a class="brand" href="#"></a>
             {% if request.user.is_authenticated %}
-                <button id="get_categories" class="fbbtn primary large alg"><i class="icon-th-list icon-white" style="margin-right: 10px"></i>Update categories</button>
-                <button id="find_places" class="fbbtn primary large alg" style="display: none;"><i class="icon-road icon-white" style="margin-right: 10px"></i>Get places</button>
+                <form class="navbar-form pull-left">
+                    <button id="get_categories" class="fbbtn primary large alg"><i class="icon-th-list icon-white" style="margin-right: 10px"></i>Update categories</button>
+                    <button id="find_places" class="fbbtn primary large alg" style="display: none;"><i class="icon-road icon-white" style="margin-right: 10px"></i>Get places</button>
+                    From
+                    <input type="text" class="span2 timepicker">
+                    To
+                    <input type="text" class="span2 timepicker">
+                </form>
             {% endif %}
 
                 {% if request.user.is_authenticated %}
