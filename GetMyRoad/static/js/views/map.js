@@ -42,9 +42,14 @@ define([
             this.categoriesView = categoriesView;
             this.map = map;
 
-            L.tileLayer('http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png', {
+            var cmUrl = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png';
+            var cm = L.tileLayer(cmUrl, {
                 maxZoom: 18
             }).addTo(map);
+
+            //-- Create minimap
+            var cm2 = L.tileLayer(cmUrl, {minZoom: 0, maxZoom: 13});
+            var miniMap = new L.Control.MiniMap(cm2, {position: 'bottomleft'}).addTo(map);
 
             //-- Create infoblock
             this.infoBlock = this.createInfoBlock();
@@ -69,8 +74,6 @@ define([
 
             var setNewPosControl = self.createSetNewPosControl();
             setNewPosControl.addTo(map)
-
-
 
             map.on('click', function (data) {
                 if (!user.get('isFigured')) {
