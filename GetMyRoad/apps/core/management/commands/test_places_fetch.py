@@ -9,13 +9,13 @@ logger = logging.getLogger("wheretogo.%s" % __name__)
 
 
 class Command(BaseCommand):
-    args = 'lat, lon, oauth_token'
+    args = 'lat, lng, oauth_token'
 
     def handle(self, *args, **options):
-        lat, lon, token = 37.75377496892, -122.42077080676, \
-        	"AAACEdEose0cBAOLOdK4eZAxsHl3rGvtROrp2c42uoYsmXJN4BksjPDqD7Sc5KmSatpZCwm0igegdm3SfftgyxuIP4xbUi3KbDDurUnZAQZDZD"
+        lat, lng, token = 37.76745803822967, -122.43988037109374, \
+            "AAACEdEose0cBACcx0R9oW2pCLxpTjJFAJFhnGJu8ZBogYY2BkZCdNnJu2TVYlJijY24aAm175wvGaZCbRjATlYe2uDVmsJElYUBeTRE5QZDZD"
 
-        admin_user = User.objects.get(username='admin')
-        trip = Trip(name="test", lat=float(lat), lon=float(lon), user=admin_user)
+        admin_user = User.objects.get(username='vasyabigi')
+        trip = Trip(name="test", lat=float(lat), lng=float(lng), user=admin_user)
         trip.save()
         trip.fetch_places(token)

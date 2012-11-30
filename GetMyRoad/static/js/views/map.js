@@ -94,6 +94,8 @@ define([
 
         setNewPosition: function() {
 
+            console.log(User);
+
             this.map.removeLayer(this.position);
 
             this.map.setZoom(10);

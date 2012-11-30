@@ -20,7 +20,7 @@ class Category(models.Model):
 
     @property
     def place_count(self):
-        return  self.places.count()
+        return self.places.count()
 
 
 class Place(models.Model):
@@ -34,6 +34,8 @@ class Place(models.Model):
     pic_small = models.CharField(blank=True, null=True, max_length=250)
     price_range = models.CharField(blank=True, null=True, max_length=250)
     phone = models.CharField(blank=True, null=True, max_length=250)
+    lat = models.FloatField('Lat')
+    lng = models.FloatField('Lng')
 
     class Meta:
         ordering = ['rank']
@@ -48,10 +50,10 @@ class TripManager(models.Manager):
 
 class Trip(models.Model):
     name = models.CharField('Trip Name', max_length=250)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name="trips")
     categories = models.ManyToManyField(Category)
     lat = models.FloatField('Lat')
-    lon = models.FloatField('Lon')
+    lng = models.FloatField('Lng')
 
     RADIUS = 50000
 
@@ -66,7 +68,7 @@ class Trip(models.Model):
         path = 'https://graph.facebook.com/search?%s' % urllib.urlencode({
             'fields': 'id',
             'type': 'place',
-            'center': "%f,%f" % (self.lat, self.lon),
+            'center': "%f,%f" % (self.lat, self.lng),
             'distance': "%.0f" % self.RADIUS,
             'access_token': oauth_token,
             'limit': 500
@@ -81,10 +83,10 @@ class Trip(models.Model):
 
         path = 'https://graph.facebook.com/fql?%s' % urllib.urlencode({
             'q': '''
-                SELECT name, page_id, fan_count, checkins, 
+                SELECT name, page_id, fan_count, checkins,
                     location, pic, pic_small, price_range,
                     phone, categories
-                FROM page 
+                FROM page
                 WHERE page_id IN (%s)''' % ', '.join(place_ids)
         })
         logger.debug(u'Trying to get datailed places list from Facebook with url: %s' % path)
@@ -106,6 +108,8 @@ class Trip(models.Model):
                     pic_small=place_data['pic_small'],
                     price_range=place_data['price_range'],
                     phone=place_data['phone'],
+                    lat=place_data['location']['latitude'],
+                    lng=place_data['location']['longitude']
                 )
                 for cat_data in place_data['categories']:
                     cat, c = Category.objects.get_or_create(
@@ -116,7 +120,10 @@ class Trip(models.Model):
 
 
 class TripPoint(models.Model):
-    category = models.ForeignKey(Category)
-    place = models.ForeignKey(Place)
-    arrive = models.DateTimeField()
-    leave = models.DateTimeField()
+    trip = models.ForeignKey(Trip, related_name="points")
+    place = models.ForeignKey(Place, related_name="points")
+    arrive = models.DateTimeField(blank=True, null=True)
+    leave = models.DateTimeField(blank=True, null=True)
+
+    def __unicode__(self):
+        return '%s for %s' % (self.place, self.trip)
