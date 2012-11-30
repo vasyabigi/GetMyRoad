@@ -142,10 +142,6 @@ define([
 
         setNewPosition: function() {
 
-<<<<<<< HEAD
-=======
-
->>>>>>> d12544848569209b17b900671f7427d94f9dbb56
             this.map.removeLayer(this.position);
 
             this.map.setZoom(10);
