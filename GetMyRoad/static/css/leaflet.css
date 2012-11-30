@@ -150,6 +150,9 @@
 .leaflet-control-zoom-out {
 	background-image: url(images/zoom-out.png);
 	}
+.leaflet-control-new-pos {
+    background-image: url(images/new.png);
+}
 
 .leaflet-control-layers {
 	box-shadow: 0 1px 7px #999;
