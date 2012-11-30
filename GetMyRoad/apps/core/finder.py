@@ -7,6 +7,9 @@ from collections import deque
 logger = logging.getLogger("gmr.%s" % __name__)
 
 
+PARALLEL_PLACES_COUNT = 3
+
+
 class CurrentPoint(object):
 
 	def __init__(self, previous_point, place, category, s_lat, s_lon):
@@ -20,13 +23,16 @@ class CurrentPoint(object):
 			self.rank = self.previous_point.rank + self.place.rank
 			time_to_get = self.previous_point.place.get_time_to_get(place.lat, place.lon)
 			self.time = self.previous_point.time + time_to_get
+			self.rank = self.previous_point.rank
 		else:
 			self.len = 1
 			self.rank = 0
 			self.time = self.place.get_time_to_get(
 				s_lat, s_lon, reverse=True
 			)
-		self.time = self.time + self.place.get_avg_spend_time(self.time)
+			self.rank = 0
+		self.rank += self.place.rank
+		self.time += self.place.get_avg_spend_time(self.time)
 
 	def can_add(self, point, time_limit):
 		if self.time + self.place.get_time_to_get(point.lat, point.lon) + \
@@ -54,7 +60,12 @@ def find(lat, lon, categories, places, time_limit):
 	places - best places of each category, groupped by category
 	'''
 
-	# in each step we are adding 3 most close point to our que
+	def sort_by(values):
+		# we don't care about 5 minutes different
+		# rank is more important in this situation
+		return int(values[0].total_seconds() / 5 / 60), values[1]
+
+	# in each step we are adding PARALLEL_PLACES_COUNT most close point to our que
 	q = deque([])
 	candidates = []
 	for cat, cat_places in places.items():
@@ -65,18 +76,20 @@ def find(lat, lon, categories, places, time_limit):
 			place.get_time_to_get(lat, lon, reverse=True) < time_limit:
 				candidates.append((
 					place.get_time_to_get(lat, lon, reverse=True),
+					place.rank,
 					place, cat
 				))
-	candidates = sorted(candidates, key=lambda x: x)
-	for candidate in candidates[:3]:
+	candidates = sorted(candidates, key=sort_by)
+	for candidate in candidates[:PARALLEL_PLACES_COUNT]:
 		q.append(CurrentPoint(
-			None, candidate[1], candidate[2], lat, lon
+			None, candidate[2], candidate[3], lat, lon
 		))
 
 	best_p = None
 	while q:
 		cp = q.popleft()
-		if not best_p or (best_p.len < cp.len):
+		if not best_p or (best_p.len < cp.len) or \
+			(best_p.len == cp.len and best_p.rank < cp.rank):
 			best_p = cp
 
 		candidates = []
@@ -86,10 +99,12 @@ def find(lat, lon, categories, places, time_limit):
 				# and possibly other reasons(place don't work on that time, etc)
 				if cp.can_add(place, time_limit):
 					new_cp = CurrentPoint(cp, place, cat, lat, lon)
-					candidates.append((new_cp.time, new_cp))
-		candidates = sorted(candidates, key=lambda x: x)
-		for candidate in candidates[:3]:
-			q.append(candidate[1])
+					candidates.append((
+						new_cp.time, new_cp.rank, new_cp
+					))
+		candidates = sorted(candidates, key=sort_by)
+		for candidate in candidates[:PARALLEL_PLACES_COUNT]:
+			q.append(candidate[2])
 
 	route = []
 	time = best_p.time + best_p.place.get_time_to_get(lat, lon)
