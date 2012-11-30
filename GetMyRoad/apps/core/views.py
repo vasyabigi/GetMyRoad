@@ -36,7 +36,7 @@ def find_places(request):
             209889829023118
         ]))
 
-    places = trip.points.values('place__lat', 'place__lon')
+    places = trip.points.values('place__lat', 'place__lon', 'place__name', 'place__id')
 
     return Response(places)
 

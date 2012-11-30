@@ -15,6 +15,7 @@ class Command(BaseCommand):
         lat, lon = 37.75377496892, -122.42077080676
 
         admin_user = User.objects.get(username='admin')
+        Trip.objects.filter(name='test').delete()
         trip = Trip(name="test", lat=float(lat), lon=float(lon), user=admin_user)
         trip.save()
         trip.find_route(set([

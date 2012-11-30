@@ -49,7 +49,7 @@ class Place(models.Model):
         # TODO: Replace with google api calls
         lat1, lon1 = float(self.lat), float(self.lon)
         lat2, lon2 = float(lat), float(lon)
-        radius = 6371.0 # km
+        radius = 6371.0  # km
 
         dlat = math.radians(lat2-lat1)
         dlon = math.radians(lon2-lon1)
@@ -64,7 +64,7 @@ class Place(models.Model):
     def get_avg_spend_time(self, current_time=None):
         '''avg time people spends in this place'''
 
-        return timedelta(seconds=3600*2)
+        return timedelta(seconds=3600*1.5)
 
 
 class TripManager(models.Manager):
@@ -75,8 +75,11 @@ class Trip(models.Model):
     name = models.CharField('Trip Name', max_length=250)
     user = models.ForeignKey(User, related_name="trips")
     categories = models.ManyToManyField(Category)
-    lat = models.FloatField('Lat')
-    lon = models.FloatField('Lng')
+    lat = models.DecimalField('Lat', decimal_places=15, max_digits=50)
+    lon = models.DecimalField('Lon', decimal_places=15, max_digits=50)
+    places = models.ManyToManyField(
+        'Place', blank=True, null=True, related_name='trips'
+    )
 
     RADIUS = 50000
 
@@ -90,7 +93,7 @@ class Trip(models.Model):
 
         social_user = self.user.social_auth.get()
 
-        path = 'https://graph.facebook.com/search?%s' % urllib.urlencode({
+        url = 'https://graph.facebook.com/search?%s' % urllib.urlencode({
             'fields': 'id',
             'type': 'place',
             'center': "%f,%f" % (self.lat, self.lon),
@@ -98,55 +101,55 @@ class Trip(models.Model):
             'access_token': social_user.extra_data['access_token'],
             'limit': 500
         })
-        logger.debug(u'Trying to get places list from Facebook with url: %s' % path)
-        response = urllib2.urlopen(path)
-        data = json.loads(response.read())
-        logger.debug('Received data: %s' % data)
-        place_ids = [item['id'] for item in data['data']]
-        while data.get('paging', {}).get('next', None):
-            next_page_url = data['paging']['next']
-            response = urllib2.urlopen(next_page_url)
-            data = json.loads(response.read())
-            for item in data['data']:
-                place_ids.append(item['id'])
-        logger.debug(u'Fetched places ids: %s' % place_ids)
 
-        path = 'https://graph.facebook.com/fql?%s' % urllib.urlencode({
-            'q': '''
-                SELECT name, page_id, fan_count, checkins,
-                    location, pic, pic_small, price_range,
-                    phone, categories
-                FROM page
-                WHERE page_id IN (%s)''' % ', '.join(place_ids)
-        })
-        logger.debug(u'Trying to get datailed places list from Facebook with url: %s' % path)
-        response = urllib2.urlopen(path)
-        data = json.loads(response.read())
-        logger.debug('Received data: %s' % data)
-        for place_data in data['data']:
-            try:
-                place = Place.objects.get(id=place_data['page_id'])
-            except Place.DoesNotExist:
-                place = Place.objects.create(
-                    id=place_data['page_id'],
-                    name=place_data['name'],
-                    checkins=place_data['checkins'],
-                    likes=place_data['fan_count'],
-                    # TODO: convert tot more cool formula
-                    rank=place_data['fan_count'] * 2 + place_data['checkins'],
-                    pic=place_data['pic'],
-                    pic_small=place_data['pic_small'],
-                    price_range=place_data['price_range'],
-                    phone=place_data['phone'],
-                    lat=place_data['location']['latitude'],
-                    lon=place_data['location']['longitude']
-                )
-                for cat_data in place_data['categories']:
-                    cat, c = Category.objects.get_or_create(
-                        id=cat_data['id'],
-                        name=cat_data['name']
+        while url:
+            logger.debug(u'Trying to get places list from Facebook with url: %s' % url)
+            response = urllib2.urlopen(url)
+            data = json.loads(response.read())
+            url = data.get('paging', {}).get('next', False)
+            print url
+            place_ids = [item['id'] for item in data['data']]
+            if not place_ids:
+                break
+            logger.debug(u'Fetched places ids: %s' % place_ids)
+
+            path = 'https://graph.facebook.com/fql?%s' % urllib.urlencode({
+                'q': '''
+                    SELECT name, page_id, fan_count, checkins,
+                        location, pic, pic_small, price_range,
+                        phone, categories
+                    FROM page
+                    WHERE page_id IN (%s)''' % ', '.join(place_ids)
+            })
+            logger.debug(u'Trying to get datailed places list from Facebook with url: %s' % path)
+            response = urllib2.urlopen(path)
+            data = json.loads(response.read())
+            logger.debug('Received data: %s' % data)
+            for place_data in data['data']:
+                try:
+                    place = Place.objects.get(id=place_data['page_id'])
+                except Place.DoesNotExist:
+                    place = Place.objects.create(
+                        id=place_data['page_id'],
+                        name=place_data['name'],
+                        checkins=place_data['checkins'],
+                        likes=place_data['fan_count'],
+                        # TODO: convert tot more cool formula
+                        rank=place_data['fan_count'] * 2 + place_data['checkins'],
+                        pic=place_data['pic'],
+                        pic_small=place_data['pic_small'],
+                        price_range=place_data['price_range'],
+                        phone=place_data['phone'],
+                        lat=place_data['location']['latitude'],
+                        lon=place_data['location']['longitude']
                     )
-                    place.categories.add(cat)
+                    for cat_data in place_data['categories']:
+                        cat, c = Category.objects.get_or_create(
+                            id=cat_data['id'],
+                            name=cat_data['name']
+                        )
+                        place.categories.add(cat)
+                self.places.add(place)
 
     def find_route(self, categories):
         from core.finder import find
@@ -156,8 +159,8 @@ class Trip(models.Model):
         places = {}
         for cat in categories:
             # TODO: add distance filtering
-            places[cat] = Place.objects.filter(categories=cat) \
-                .order_by('-rank')[:10]
+            places[cat] = self.places.filter(categories=cat) \
+                .order_by('-rank')[:15]
         route, time = find(
             self.lat, self.lon, categories, places,
             timedelta(seconds=3600 * 10)
@@ -184,4 +187,4 @@ class TripPoint(models.Model):
         ordering = ['arrive']
 
     def __unicode__(self):
-        return '%s for %s' % (self.place, self.trip)
+        return u'%s for %s' % (self.place, self.trip)

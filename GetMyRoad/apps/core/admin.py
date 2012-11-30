@@ -7,7 +7,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 class PlaceAdmin(admin.ModelAdmin):
-	list_display = ('name', 'categories_display')
+	list_display = ('name', 'categories_display', 'rank')
 
 	def categories_display(self, obj):
 		return ' - '.join([cat.name for cat in obj.categories.all()])

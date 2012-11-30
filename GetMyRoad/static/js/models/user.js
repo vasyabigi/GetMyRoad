@@ -17,7 +17,9 @@ define([
         currentPos: {
             lat: null,
             lng: null
-        }
+        },
+
+        isGotTheRoad: false
 
     },
 
