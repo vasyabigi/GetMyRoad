@@ -33,10 +33,11 @@
                 <div class="navbar-form pull-left">
                     <button id="get_categories" class="fbbtn primary large alg"><i class="icon-th-list icon-white" style="margin-right: 10px"></i>Update categories</button>
                     <button id="find_places" class="fbbtn primary large alg" style="display: none;"><i class="icon-road icon-white" style="margin-right: 10px"></i>Get places</button>
-                    From
-                    <input type="text" class="span2 timepicker">
-                    To
-                    <input type="text" class="span2 timepicker">
+                    <div id="timepickers" class="timepickers">
+                        <input type="text" placeholder="From" class="span2 timepicker from" >
+                        <input type="text" placeholder="To" class="span2 timepicker to">
+                    </div>
+
                 </div>
             {% endif %}
 

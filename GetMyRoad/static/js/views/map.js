@@ -150,8 +150,9 @@ define([
               user.set({"tripId": contents.trip_id });
 
               self.$('#find_places').show();
+              self.$('#timepickers').show();
               self.$('#sidebar-opener').trigger('click');
-              self.$('#category-sidebar').addClass('toggled');
+              //self.$('#category-sidebar').addClass('toggled');
           });
 
         },
