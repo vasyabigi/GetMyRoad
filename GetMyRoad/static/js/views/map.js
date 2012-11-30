@@ -106,7 +106,7 @@ define([
             var self = this,
                 map = this.map;
 
-            map.locate({setView: true, maxZoom: 13});
+            map.locate({setView: true, maxZoom: 15});
 
             map.on('locationfound', function(data) {
                 if (self.currentPos) return;
@@ -114,7 +114,7 @@ define([
                 var circleOptions = {
                         color: 'green',
                         fillColor: 'green',
-                        fillOpacity: 0.5
+                        fillOpacity: 0.3
                     },
                     markerOptions = {
                         color: 'green',
@@ -125,8 +125,8 @@ define([
 
                 user.set({currentPos: data.latlng});
 
-                var accurCircle = L.circle(data.latlng, data.accuracy/2, circleOptions),
-                    meMarker = L.circleMarker(data.latlng, markerOptions).bindPopup("You are within " + (data.accuracy/2).toFixed(0) + " meters from this point");
+                var accurCircle = L.circle(data.latlng, data.accuracy, circleOptions),
+                    meMarker = L.circleMarker(data.latlng, markerOptions).bindPopup("You are within " + (data.accuracy).toFixed(0) + " meters from this point");
                 self.currentPos = L.layerGroup([accurCircle, meMarker]).addTo(map);
 
 
@@ -142,10 +142,6 @@ define([
 
         setNewPosition: function() {
 
-<<<<<<< HEAD
-=======
-
->>>>>>> d12544848569209b17b900671f7427d94f9dbb56
             this.map.removeLayer(this.position);
 
             this.map.setZoom(10);
