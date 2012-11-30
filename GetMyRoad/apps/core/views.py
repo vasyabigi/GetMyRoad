@@ -4,6 +4,7 @@ from django.contrib.auth import logout as auth_logout
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from models import Trip
+from dateutil import parser
 
 router = routing.Router("f3f25538fbae4777b3e2c8ff3f6d53f5", "navigation.cloudmade.com")
 
@@ -20,10 +21,14 @@ def logout(request):
 @api_view(['GET'])
 def select_categories(request):
     if request.user.is_authenticated():
+        start = parser.parse(request.GET.get('start', ''))
+        end = parser.parse(request.GET.get('end', ''))
         trip = Trip.objects.create(
             user=request.user,
             lat=float(request.GET['lat']),
-            lon=float(request.GET['lng'])
+            lon=float(request.GET['lng']),
+            start=start,
+            end=end
         )
         trip.fetch_places()
     return Response({
