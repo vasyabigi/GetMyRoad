@@ -17,33 +17,39 @@ define([
         events: {'click #set-new-pos': 'setNewPosition'},
 
         initialize: function() {
-            var self = this;
-            this.meMarker = {};
+            var self = this,
+                map = L.map('map', {
+                    center: [50.451, 30.523],
+                    zoom: 13
+                });
 
-            var map = L.map('map', {
-                center: [50.451, 30.523],
-                zoom: 13
-            });
             this.map = map;
 
             L.tileLayer('http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png', {
                 maxZoom: 18
             }).addTo(map);
 
-            self.getMyLocation();
+            this.getMyLocation();
 
             map.on('click', function(data){
-                if (User.get('isFigured')) {
+                if (!User.get('isFigured')) {
+
+                    var circleOptions = {
+                        color: 'green',
+                        fillColor: 'green',
+                        fillOpacity: 0.5
+                    };
+
+                    L.marker(data.latlng).bindPopup("You are here").addTo(map);
+
                     self.updateUserCoordinates(data.latlng);
-                    this.meMarker.setLatLng(data.latlng);
                 }
-            })
+            });
         },
 
         getMyLocation: function() {
             var self = this,
-                map = self.map,
-                meMarker = self.meMarker;
+                map = this.map;
 
             map.locate({setView: true, maxZoom: 15});
 
@@ -55,7 +61,7 @@ define([
                 };
                 L.circle(data.latlng, data.accuracy, circleOptions).addTo(map);
 
-                meMarker = L.marker(data.latlng).bindPopup("You are here").addTo(map);
+                L.marker(data.latlng).bindPopup("You are here").addTo(map);
 
                 self.updateUserCoordinates(data.latlng);
             });
@@ -66,18 +72,17 @@ define([
         },
 
         setNewPosition: function() {
-
             User.set({isFigured: false});
+            console.log(User);
 
+            // Delete old marker
         },
 
         updateUserCoordinates: function(coordinates) {
-
             User.set({
                 coordinates: coordinates,
                 isFigured: true
             });
-
         }
 
   });
