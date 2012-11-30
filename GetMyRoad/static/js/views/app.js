@@ -31,6 +31,7 @@ define([
     fetchPlaces: function() {
       var coordinates = User.get('coordinates');
       $.ajax({
+          type: "POST",
           url: 'find-places/',
           async: false,
           dataType: 'json',

@@ -13,11 +13,11 @@ def logout(request):
     return redirect('home')
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def find_places(request):
     places = None
 
-    # request.GET['lat'], request.GET['lng']
+    # request.POST['lat'], request.POST['lng']
 
     # Place for Anton job
 
