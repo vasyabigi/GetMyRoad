@@ -2,9 +2,11 @@ import logging
 import urllib
 import urllib2
 import json
+import math
 
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import timedelta
 
 
 logger = logging.getLogger("gmr.%s" % __name__)
@@ -43,6 +45,20 @@ class Place(models.Model):
     def __unicode__(self):
         return self.name
 
+    def get_time_to_get(self, lat, lon):
+        # TODO: Replace with google api calls
+        lat1, lon1 = self.lat, self.lon
+        lat2, lon2 = lat, lon
+        radius = 6371 # km
+
+        dlat = math.radians(lat2-lat1)
+        dlon = math.radians(lon2-lon1)
+        a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) \
+            * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+        d = radius * c
+
+        return d / 40
 
 class TripManager(models.Manager):
     pass
@@ -77,8 +93,13 @@ class Trip(models.Model):
         response = urllib2.urlopen(path)
         data = json.loads(response.read())
         logger.debug('Received data: %s' % data)
-        # TODO retrieve info from next pages if numbers less than 500
         place_ids = [item['id'] for item in data['data']]
+        while data.get('paging', {}).get('next', None):
+            next_page_url = data['paging']['next']
+            response = urllib2.urlopen(next_page_url)
+            data = json.loads(response.read())
+            for item in data['data']:
+                place_ids.append(item['id'])
         logger.debug(u'Fetched places ids: %s' % place_ids)
 
         path = 'https://graph.facebook.com/fql?%s' % urllib.urlencode({
@@ -118,6 +139,18 @@ class Trip(models.Model):
                     )
                     place.categories.add(cat)
 
+    def find_route(self, categories):
+        from core.finder import find
+        places = {}
+        for cat in categories:
+            # TODO: add distance filtering
+            places[cat] = Place.objects.filter(categories=cat) \
+                .order_by('-rank')[:10]
+        route = find(
+            self.lat, self.lon, categories, places,
+            timedelta(seconds=3600)
+        )
+        import ipdb; ipdb.set_trace()
 
 class TripPoint(models.Model):
     trip = models.ForeignKey(Trip, related_name="points")
