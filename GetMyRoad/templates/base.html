@@ -28,11 +28,10 @@
     <div class="navbar-inner">
         <div class="container">
             <a class="brand" href="#"></a>
-            <ul class="nav">
-                <li><a href="#">_TEXT_</a></li>
-            </ul>
-            <button id="get_categories" class="btn">Fetch categories</button>
-            <button id="find_places" class="btn">Get places</button>
+            {% if request.user.is_authenticated %}
+                <button id="get_categories" class="btn">Fetch categories</button>
+                <button id="find_places" class="btn" style="display: none;">Get places</button>
+            {% endif %}
             <p class="navbar-text pull-right">
                 {% if request.user.is_authenticated %}
                 Hi, {{ request.user.first_name }} {{ request.user.last_name }} <a href="{% url 'logout' %}">Logout</a>

@@ -108,7 +108,8 @@ define([
 
 
         addCategories: function() {
-          var coordinates = user.get('coordinates');
+          var self = this,
+              coordinates = user.get('coordinates');
 
           $.ajax({
             type: "GET",
@@ -138,6 +139,9 @@ define([
 
               categories.add(data);
               user.set({"tripId": contents.trip_id });
+
+              self.$('#find_places').show();
+              self.$('#sidebar-opener').trigger('click');
           });
 
         },
@@ -240,7 +244,7 @@ define([
 
                     trip.on('add', self.addPlaceMarker, self);
 
-                    $.each(contents, function(i, e) {
+                    $.each(contents.places, function(i, e) {
                         data[i] = {
                           'order': i,
                           'lat': e.place__lat,
@@ -251,6 +255,7 @@ define([
                     });
                     trip.add(data);
                     self.buildRoad(trip);
+                    alert(contents.summary);
                 });
 
                 user.set({'isGotTheRoad': true });
