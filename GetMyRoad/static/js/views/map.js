@@ -9,7 +9,9 @@ define([
   'models/user',
   'collections/trip',
 
-  'vendor/csrf'
+  'vendor/csrf',
+
+  'leafletPlugins'
 
 ], function($, _, Backbone, L, user, Trip) {
 
@@ -42,19 +44,35 @@ define([
             this.infoBlock.addTo(map);
 
             //-- Create FindMe Control
-            this.findMeControl = this.createFindMeControl();
-            this.findMeControl.addTo(map);
+            this.findMeControl = L.control.locate().addTo(map);
 
             //-- Find my location
             this.getMyLocation();
 
             //-- Set New Position
-            map.on('click', function(data){
-                if (!user.get('isFigured')) {
-                    self.position = L.marker(data.latlng).addTo(map);
-                    self.updateUserCoordinates(data.latlng);
-                }
+            // map.on('click', function(data){
+            //     if (!user.get('isFigured')) {
+            //         self.position = L.marker(data.latlng).addTo(map);
+            //         self.updateUserCoordinates(data.latlng);
+            //     }
+            // });
+
+            var drawControl = new L.Control.Draw({
+                position: 'topleft',
+                polyline: false,
+                polygon: false,
+                circle: false,
+                rectangle: false
             });
+
+            map.addControl(drawControl);
+
+            map.on('draw:marker-created', function (e) {
+                e.marker.bindPopup('New position');
+                self.position = e.marker.addTo(map);
+                console.log(e)
+            });
+
         },
 
         createInfoBlock: function() {
@@ -75,33 +93,6 @@ define([
           return infoBlock;
         },
 
-        createFindMeControl: function() {
-            var self = this,
-                map = self.map;
-
-            var findMe = L.control({
-                position: 'topleft'
-            });
-
-            findMe.onAdd = function(map) {
-                var wrapper = L.DomUtil.create('div', 'leaflet-control-locate-wrap');
-                var link = L.DomUtil.create('a', 'leaflet-control-locate', wrapper);
-                link.href = '#';
-                link.title = 'Show me where I am';
-
-                L.DomEvent
-                    .on(link, 'click', L.DomEvent.stopPropagation)
-                    .on(link, 'click', L.DomEvent.preventDefault)
-                    .on(link, 'click', function() {
-                        self.getMyLocation();
-                    })
-
-                return wrapper;
-            };
-
-            return findMe;
-        },
-
         getMyLocation: function() {
             var self = this,
                 map = this.map;
@@ -109,26 +100,12 @@ define([
             map.locate({setView: true, maxZoom: 15});
 
             map.on('locationfound', function(data) {
-                if (self.currentPos) return;
-
-                var circleOptions = {
-                        color: 'green',
-                        fillColor: 'green',
-                        fillOpacity: 0.3
-                    },
-                    markerOptions = {
-                        color: 'green',
-                        fillColor: 'green',
-                        fillOpacity: 0.7,
-                        radius: 4
-                    }
 
                 user.set({currentPos: data.latlng});
 
-                var accurCircle = L.circle(data.latlng, data.accuracy, circleOptions),
-                    meMarker = L.circleMarker(data.latlng, markerOptions).bindPopup("You are within " + (data.accuracy).toFixed(0) + " meters from this point");
-                self.currentPos = L.layerGroup([accurCircle, meMarker]).addTo(map);
-
+                // var accurCircle = L.circle(data.latlng, data.accuracy, circleOptions),
+                //     meMarker = L.circleMarker(data.latlng, markerOptions).bindPopup("You are within " + (data.accuracy).toFixed(0) + " meters from this point");
+                // self.currentPos = L.layerGroup([accurCircle, meMarker]).addTo(map);
 
                 self.position = L.marker(data.latlng).addTo(map);
 

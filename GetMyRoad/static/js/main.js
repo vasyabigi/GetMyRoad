@@ -7,7 +7,8 @@ require.config({
     handlebars: 'vendor/handlebars',
     text: 'vendor/require-text',
     leaflet: 'vendor/leaflet',
-    csrf: 'vendor/csrf'
+    csrf: 'vendor/csrf',
+    leafletPlugins: 'vendor/leafletPlugins'
   },
   // Underscore and Backbone are not AMD-capable per default,
   // so we need to use the AMD wrapping of RequireJS
@@ -28,6 +29,8 @@ require.config({
     leaflet: {
       exports: 'L'
     },
+
+    leafletPlugins: ['leaflet'],
 
     'csrf': {
         deps: ['jquery']
