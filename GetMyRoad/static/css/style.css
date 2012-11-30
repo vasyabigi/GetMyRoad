@@ -165,11 +165,6 @@ body {
     outline: 1px dotted #666;
 }
 
-.fb {
-    border-radius: 6px !important;
-    -webkit-border-radius: 6px !important;
-    -moz-border-radius: 6px !important;
-}
 
 .leaflet-setnew-locate-wrap {
     padding: 5px;
@@ -240,6 +235,7 @@ body {
     writing-mode: tb-rl;
     filter: flipv fliph;
     -webkit-transform:rotate(-90deg);
+    -moz-transform:rotate(-90deg);
     color: white;
     white-space:nowrap;
     display: block;

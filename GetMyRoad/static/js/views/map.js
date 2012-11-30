@@ -73,6 +73,7 @@ define([
                 popupAnchor:  [0, -30]
             })
             this.snowIcon = snowIcon;
+
             map.on('click', function(data){
                 if (!user.get('isFigured')) {
                     self.position = L.marker(data.latlng, {icon: snowIcon}).bindPopup('Start').addTo(map);
@@ -81,7 +82,8 @@ define([
             });
 
             var setNewPosControl = self.createSetNewPosControl();
-            setNewPosControl.addTo(map)
+
+            setNewPosControl.addTo(map);
         },
 
         createSetNewPosControl: function() {
@@ -96,15 +98,15 @@ define([
                 var wrapper = L.DomUtil.create('div', 'leaflet-setnew-control-locate-wrap');
                 var link = L.DomUtil.create('a', 'leaflet-setnew-control-locate', wrapper);
                 link.href = '#';
-                link.id = '#set-new-pos'
+                link.id = '#set-new-pos';
                 link.title = 'Show me where I am';
 
                 L.DomEvent
                     .on(link, 'click', L.DomEvent.stopPropagation)
                     .on(link, 'click', L.DomEvent.preventDefault)
                     .on(link, 'click', function() {
-                        self.setNewPosition()
-                    })
+                        self.setNewPosition();
+                    });
 
                 return wrapper;
             };
@@ -114,6 +116,8 @@ define([
 
 
         addCategories: function() {
+
+          console.log('here');
           var self = this,
               coordinates = user.get('coordinates');
 
@@ -231,8 +235,8 @@ define([
             }
             this.markers = [];
 
-            for(var i in this.polylines) {
-              this.map.removeLayer(this.polylines[i]);
+            for(var j in this.polylines) {
+              this.map.removeLayer(this.polylines[j]);
             }
             this.polylines = [];
         },
