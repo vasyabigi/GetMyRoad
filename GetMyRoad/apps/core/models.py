@@ -17,6 +17,9 @@ class Category(models.Model):
     name = models.CharField('Name', max_length=250)
     is_main = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ['name']
+
     def __unicode__(self):
         return self.name
 
@@ -76,31 +79,40 @@ class Place(models.Model):
         else:
             if data:
                 wd = time.strftime('%a').lower()
-                open_from_1 = parser.parse(
-                  data.get("%s_1_open" % wd, None)
-                )
+                try:
+                    open_from_1 = parser.parse(
+                      data.get("%s_1_open" % wd, None)
+                    )
+                except AttributeError:
+                    return True
                 try:
                     open_from_2 = parser.parse(
                       data.get("%s_2_open" % wd, None)
                     )
                 except AttributeError:
                     open_from_2 = None
-                close_from_1 = parser.parse(
-                  data.get("%s_1_close" % wd, None)
-                )
+                try:
+                    close_from_1 = parser.parse(
+                      data.get("%s_1_close" % wd, None)
+                    )
+                except AttributeError:
+                    return True
                 try:
                     close_from_2 = parser.parse(
                       data.get("%s_2_close" % wd, None)
                     )
                 except AttributeError:
                     close_from_2 = None
-                return (
-                    open_from_1 <= time + self.get_avg_spend_time() <= close_from_1
-                ) or (
-                    open_from_2 and close_from_2 and \
-                    open_from_2 <= time + self.get_avg_spend_time() <= close_from_2
-                    
-                )
+                try:
+                    return (
+                        open_from_1 <= time + self.get_avg_spend_time() <= close_from_1
+                    ) or (
+                        open_from_2 and close_from_2 and \
+                        open_from_2 <= time + self.get_avg_spend_time() <= close_from_2
+                        
+                    )
+                except TypeError:
+                    return True
         return True
 
 
@@ -194,7 +206,8 @@ class Trip(models.Model):
                             name=cat_data['name']
                         )
                         place.categories.add(cat)
-                        self.categories.add(cat)
+                for cat_data in place_data['categories']:
+                    self.categories.add(cat_data['id'])
                 self.places.add(place)
 
     def find_route(self, categories):
