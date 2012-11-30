@@ -152,7 +152,7 @@ class Trip(models.Model):
                             name=cat_data['name']
                         )
                         place.categories.add(cat)
-                        trip.categories.add(cat)
+                        self.categories.add(cat)
                 self.places.add(place)
 
     def find_route(self, categories):
