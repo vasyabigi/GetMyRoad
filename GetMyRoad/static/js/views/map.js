@@ -76,6 +76,8 @@ define([
 
             map.on('click', function(data){
                 if (!user.get('isFigured')) {
+                    self.map.off('mousemove');
+                    self.map.removeLayer(self.tempMarker);
                     self.position = L.marker(data.latlng, {icon: snowIcon}).bindPopup('Start').addTo(map);
                     self.updateUserCoordinates(data.latlng);
                 }
@@ -204,8 +206,16 @@ define([
         },
 
         setNewPosition: function() {
+            var self = this,
+                map = self.map;
 
             this.clearObjects();
+
+            self.tempMarker = L.marker({}, {icon: self.snowIcon}).addTo(map)
+            map.on('mousemove', function(e) {
+                self.tempMarker.setLatLng(e.latlng)
+            })
+
             $('#get_categories').show();
             $('#find_places').hide();
 
