@@ -29,18 +29,13 @@ define([
                 maxZoom: 18
             }).addTo(map);
 
-            this.getMyLocation();
+            self.getMyLocation();
 
             map.on('click', function(data){
                 if (!User.get('isFigured')) {
 
-                    var circleOptions = {
-                        color: 'green',
-                        fillColor: 'green',
-                        fillOpacity: 0.5
-                    };
-
-                    self.position = L.marker(data.latlng).bindPopup("You are here").addTo(map);
+                    self.map.removeLayer(self.position);
+                    self.position = L.marker(data.latlng).bindPopup("New Position").addTo(map);
 
                     self.updateUserCoordinates(data.latlng);
                 }
@@ -49,7 +44,7 @@ define([
 
         getMyLocation: function() {
             var self = this,
-                map = this.map;
+                map = self.map;
 
             map.locate({setView: true, maxZoom: 15});
 
@@ -60,8 +55,10 @@ define([
                     fillOpacity: 0.5
                 };
 
-                L.circle(data.latlng, data.accuracy, circleOptions).addTo(map);
-                self.position = L.marker(data.latlng).bindPopup("You are here").addTo(map);
+                var accurCircle = L.circle(data.latlng, data.accuracy, circleOptions),
+                    meMarker = L.marker(data.latlng).bindPopup("You are here");
+
+                self.position = L.layerGroup([accurCircle, meMarker]).addTo(map);
 
                 self.updateUserCoordinates(data.latlng);
             });
@@ -72,11 +69,11 @@ define([
         },
 
         setNewPosition: function() {
-            User.set({isFigured: false});
-            console.log(User);
-            console.log(this.position);
+            var self = this;
+            self.map.setZoom(10);
 
-            // Delete old marker
+            User.set({isFigured: false});
+
         },
 
         updateUserCoordinates: function(coordinates) {
