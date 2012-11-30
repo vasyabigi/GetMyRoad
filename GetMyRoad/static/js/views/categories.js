@@ -28,10 +28,10 @@ define([
 
     render: function() {
       var self = this;
-      self.$el.find('#categories').html("");
+      self.$el.find('#categories ul').html("");
       categories.each(function(el) {
           elView = new CategoryView({ model: el });
-          self.$el.find('#categories').prepend(elView.render().el);
+          self.$el.find('#categories ul').prepend(elView.render().el);
       });
     }
 
