@@ -187,3 +187,30 @@ body {
     border-radius: 4px;
 }
 
+.category-sidebar{
+    position: absolute;
+    z-index: 100;
+    top:50%;
+    right: 0;
+    margin-top: -150px;
+    background: white;
+    width: 300px;
+    height: 300px;
+}
+
+.sidebar-opener-wrapper{
+    background: red;
+    width: 50px;
+    height: 100%;
+    display: block;
+    position: absolute;
+    margin-left: -50px;
+}
+
+.categories-wrapper{
+    background: green;
+    display: block;
+    width: 250px;
+    height: 100%;
+    margin-left: 50px;
+}

@@ -13,10 +13,17 @@ define([
 
   var CategoriesView = Backbone.View.extend({
 
-    el: '#categories',
+    el: '#category-sidebar',
+
+    events: {
+      'click #sidebar-opener': 'sliderToggle'
+    },
 
     initialize: function() {
       categories.on('add', this.render, this);
+    },
+    sliderToggle : function(){
+        alert('hello');
     },
 
     render: function() {
