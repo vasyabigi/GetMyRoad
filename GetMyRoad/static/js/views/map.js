@@ -117,17 +117,18 @@ define([
           $.ajax({
             type: "GET",
             url: 'select-categories/',
-            async: false,
+            async: true,
             dataType: 'json',
             data: {
               "lat": coordinates.lat,
               "lng": coordinates.lng
             },
             beforeSend: function(){
-                $('#spinner').fadeToggle();
+                $('#spinner').fadeIn();
             },
-            success: function() {
-                $('#spinner').fadeToggle();
+            complete: function() {
+                $('#spinner').fadeOut('slow');
+                $('#get_categories').hide();
             }
           }).then(function(contents) {
 
@@ -195,6 +196,8 @@ define([
         setNewPosition: function() {
 
             this.clearObjects();
+            $('#get_categories').show();
+            $('#find_places').hide();
 
             this.map.removeLayer(this.position);
 
@@ -241,19 +244,23 @@ define([
                 }
             });
 
-            console.log(activatedCategories);
-
             var self = this,
                 coordinates = user.get('coordinates');
 
             $.ajax({
               type: "GET",
               url: 'find-places/',
-              async: false,
+              async: true,
               dataType: 'json',
               data: {
                 "id": user.get('tripId'),
                 "categories": activatedCategories
+              },
+              beforeSend: function(){
+                $('#spinner').fadeIn();
+              },
+              complete: function() {
+                  $('#spinner').fadeOut('slow');
               }
             }).then(function(contents) {
                 var trip = new Trip(),
