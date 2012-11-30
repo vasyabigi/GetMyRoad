@@ -111,7 +111,7 @@ define([
           var coordinates = user.get('coordinates');
 
           $.ajax({
-            type: "POST",
+            type: "GET",
             url: 'select-categories/',
             async: false,
             dataType: 'json',
@@ -226,7 +226,7 @@ define([
                     coordinates = user.get('coordinates');
 
                 $.ajax({
-                  type: "POST",
+                  type: "GET",
                   url: 'find-places/',
                   async: false,
                   dataType: 'json',
