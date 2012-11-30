@@ -7,7 +7,9 @@ define([
 
   // Models
   'models/user',
-  'collections/trip'
+  'collections/trip',
+
+  'csrf'
 
 ], function($, _, Backbone, L, user, Trip) {
 
