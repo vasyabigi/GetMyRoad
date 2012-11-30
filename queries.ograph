@@ -1,0 +1,3 @@
+
+SELECT name, page_id, fan_count, checkins , location, pic, pic_small, price_range, phone, categories FROM page 
+WHERE page_id = 152647578084685
