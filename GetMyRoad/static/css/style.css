@@ -294,7 +294,7 @@ body {
     margin-top: 0.8em;
 }
 .timepickers{
-    display: none;
+    display: block;
     left: 50%;
     position: absolute;
     margin-left: 9.5em;
