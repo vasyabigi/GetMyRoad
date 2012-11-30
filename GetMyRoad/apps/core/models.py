@@ -38,6 +38,7 @@ class Place(models.Model):
     phone = models.CharField(blank=True, null=True, max_length=250)
     lat = models.DecimalField('Lat', decimal_places=15, max_digits=50)
     lon = models.DecimalField('Lng', decimal_places=15, max_digits=50)
+    hours = models.TextField('Hours', blank=True, null=True)
 
     class Meta:
         ordering = ['rank']
@@ -66,6 +67,42 @@ class Place(models.Model):
 
         return timedelta(seconds=3600*1.5)
 
+    def does_work(self, time):
+        from dateutil import parser
+        try:
+            data = json.loads(self.hours)
+        except:
+            return True
+        else:
+            if data:
+                wd = time.strftime('%a').lower()
+                open_from_1 = parser.parse(
+                  data.get("%s_1_open" % wd, None)
+                )
+                try:
+                    open_from_2 = parser.parse(
+                      data.get("%s_2_open" % wd, None)
+                    )
+                except AttributeError:
+                    open_from_2 = None
+                close_from_1 = parser.parse(
+                  data.get("%s_1_close" % wd, None)
+                )
+                try:
+                    close_from_2 = parser.parse(
+                      data.get("%s_2_close" % wd, None)
+                    )
+                except AttributeError:
+                    close_from_2 = None
+                return (
+                    open_from_1 <= time + self.get_avg_spend_time() <= close_from_1
+                ) or (
+                    open_from_2 and close_from_2 and \
+                    open_from_2 <= time + self.get_avg_spend_time() <= close_from_2
+                    
+                )
+        return True
+
 
 class TripManager(models.Manager):
     pass
@@ -77,6 +114,10 @@ class Trip(models.Model):
     categories = models.ManyToManyField(Category)
     lat = models.DecimalField('Lat', decimal_places=15, max_digits=50)
     lon = models.DecimalField('Lon', decimal_places=15, max_digits=50)
+    start = models.DateTimeField(default=datetime.now)
+    end = models.DateTimeField(
+        default=lambda: datetime.now() + timedelta(seconds=3600*8)
+    )
     places = models.ManyToManyField(
         'Place', blank=True, null=True, related_name='trips'
     )
@@ -120,7 +161,7 @@ class Trip(models.Model):
                 'q': '''
                     SELECT name, page_id, fan_count, checkins,
                         location, pic, pic_small, price_range,
-                        phone, categories
+                        phone, categories, hours
                     FROM page
                     WHERE page_id IN (%s)''' % ', '.join(place_ids)
             })
@@ -144,7 +185,8 @@ class Trip(models.Model):
                         price_range=place_data['price_range'],
                         phone=place_data['phone'],
                         lat=place_data['location']['latitude'],
-                        lon=place_data['location']['longitude']
+                        lon=place_data['location']['longitude'],
+                        hours=json.dumps(place_data['hours'])
                     )
                     for cat_data in place_data['categories']:
                         cat, c = Category.objects.get_or_create(
@@ -152,7 +194,7 @@ class Trip(models.Model):
                             name=cat_data['name']
                         )
                         place.categories.add(cat)
-                        trip.categories.add(cat)
+                        self.categories.add(cat)
                 self.places.add(place)
 
     def find_route(self, categories):
@@ -167,15 +209,14 @@ class Trip(models.Model):
                 .order_by('-rank')[:10]
         route, time = find(
             self.lat, self.lon, categories, places,
-            timedelta(seconds=3600 * 10)
+            self.start, self.end
         )
-        now = datetime.now()
         for point in route:
             TripPoint.objects.create(
                 trip=self,
                 place=point.place,
-                arrive=now + point.time,
-                leave=now + point.time + point.place.get_avg_spend_time(
+                arrive=point.time,
+                leave=point.time + point.place.get_avg_spend_time(
                     point.time
                 )
             )

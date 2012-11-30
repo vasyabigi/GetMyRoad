@@ -19,7 +19,9 @@ define([
             lng: null
         },
 
-        isGotTheRoad: false
+        isGotTheRoad: false,
+
+        tripId: null
 
     },
 

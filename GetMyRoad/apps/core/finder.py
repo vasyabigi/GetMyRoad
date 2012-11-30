@@ -13,7 +13,7 @@ PARALLEL_PLACES_COUNT = 3
 
 class CurrentPoint(object):
 
-    def __init__(self, previous_point, place, category, s_lat, s_lon):
+    def __init__(self, previous_point, place, category, s_lat, s_lon, start):
         self.previous_point = previous_point
         self.place = place
         self.s_lat = s_lat
@@ -28,21 +28,24 @@ class CurrentPoint(object):
         else:
             self.len = 1
             self.rank = 0
-            self.time = self.place.get_time_to_get(
+            self.time = start + self.place.get_time_to_get(
                 s_lat, s_lon, reverse=True
             )
             self.rank = 0
         self.rank += self.place.rank
         self.time += self.place.get_avg_spend_time(self.time)
 
-    def can_add(self, point, time_limit):
+    def can_add(self, point, end):
         if self.time + self.place.get_time_to_get(point.lat, point.lon) + \
             self.place.get_avg_spend_time(self.time) + \
             self.place.get_time_to_get(self.s_lat, self.s_lon) \
-        >= time_limit:
+        >= end:
             return False
-        # TODO check if place works at that time
-        return True
+
+        if self.place.does_work(self.time):
+            return True
+        else:
+            return False
 
     def get_unused_categories(self, categories):
         used_categories = set()
@@ -53,18 +56,20 @@ class CurrentPoint(object):
         return categories - used_categories
 
 
-def find(lat, lon, categories, places, time_limit):
+def find(lat, lon, categories, places, start, end):
     '''
     lat, long - coordinates of start point
     categories - set of prefered categories
-    time_limit - time limit
+    end - time limit
     places - best places of each category, groupped by category
     '''
 
     def sort_by(values):
-        # we don't care about 15 minutes different
+        # we don't care about 15 minutes difference
         # rank is more important in this situation
-        return math.ceil(values[0].total_seconds() / 5.0 / 60.0) * 5 * 60, values[1]
+        return math.ceil(
+            (values[0] - start).total_seconds() / 5.0 / 60.0
+        ) * 5 * 60, values[1]
 
     # in each step we are adding PARALLEL_PLACES_COUNT most close point to our que
     q = deque([])
@@ -72,18 +77,18 @@ def find(lat, lon, categories, places, time_limit):
     for cat, cat_places in places.items():
         for place in cat_places:
             # checking if we are still fitting to the time limit
-            if place.get_time_to_get(lat, lon) + \
+            if start + place.get_time_to_get(lat, lon) + \
             place.get_avg_spend_time(place.get_time_to_get(lat, lon)) + \
-            place.get_time_to_get(lat, lon, reverse=True) < time_limit:
+            place.get_time_to_get(lat, lon, reverse=True) < end:
                 candidates.append((
-                    place.get_time_to_get(lat, lon, reverse=True),
+                    start + place.get_time_to_get(lat, lon, reverse=True),
                     place.rank,
                     place, cat
                 ))
     candidates = sorted(candidates, key=sort_by)
     for candidate in candidates[:PARALLEL_PLACES_COUNT]:
         q.append(CurrentPoint(
-            None, candidate[2], candidate[3], lat, lon
+            None, candidate[2], candidate[3], lat, lon, start
         ))
 
     best_p = None
@@ -98,8 +103,8 @@ def find(lat, lon, categories, places, time_limit):
             for place in places[cat]:
                 # checking if we are still fitting to the time limit
                 # and possibly other reasons(place don't work on that time, etc)
-                if cp.can_add(place, time_limit):
-                    new_cp = CurrentPoint(cp, place, cat, lat, lon)
+                if cp.can_add(place, end):
+                    new_cp = CurrentPoint(cp, place, cat, lat, lon, start)
                     candidates.append((
                         new_cp.time, new_cp.rank, new_cp
                     ))
