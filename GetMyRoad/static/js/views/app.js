@@ -3,9 +3,12 @@ define([
   'underscore',
   'backbone',
 
+  // Models
+  'models/user',
+
   // Views:
   'views/map'
-], function($, _, Backbone, MapView) {
+], function($, _, Backbone, User, MapView) {
 
   var AppView = Backbone.View.extend({
 
@@ -26,9 +29,18 @@ define([
     },
 
     fetchPlaces: function() {
-      $.ajax({ url: 'find-places/', async: false }).then(function(contents) {
-          data = contents;
-      });
+      var coordinates = User.get('coordinates');
+      $.ajax({
+          url: 'find-places/',
+          async: false,
+          dataType: 'json',
+          data: {
+            "lat": coordinates.lat,
+            "lng": coordinates.lng
+          }
+        }).then(function(contents) {
+            data = contents;
+        });
       console.log(data);
     }
 

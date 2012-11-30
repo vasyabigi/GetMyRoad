@@ -17,6 +17,8 @@ def logout(request):
 def find_places(request):
     places = None
 
+    # request.GET['lat'], request.GET['lng']
+
     # Place for Anton job
 
     context = {
