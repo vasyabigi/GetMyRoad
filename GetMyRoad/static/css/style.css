@@ -240,6 +240,7 @@ body {
     writing-mode: tb-rl;
     filter: flipv fliph;
     -webkit-transform:rotate(-90deg);
+    -moz-transform:rotate(-90deg);
     color: white;
     white-space:nowrap;
     display: block;
