@@ -3,8 +3,12 @@ define([
   'underscore',
   'backbone',
 
-  'leaflet'
-], function($, _, Backbone, L) {
+  'leaflet',
+
+  // Models
+  'models/user'
+
+], function($, _, Backbone, L, User) {
 
   var MapView = Backbone.View.extend({
 
@@ -28,9 +32,8 @@ define([
             self.getMyLocation();
         },
 
-        getMyLocation: function() {
-            var self = this,
-                map = self.map;
+        getMyLocation: function(map) {
+            var self = this;
 
             map.locate({setView: true, maxZoom: 15});
 
@@ -42,13 +45,21 @@ define([
                 };
                 L.circle(data.latlng, data.accuracy, circleOptions).addTo(map);
                 L.marker(data.latlng).bindPopup("You are here").addTo(map);
+
+                self.updateUserCoordinates(data.latlng);
             });
+
             map.on('locationerror', function() {
-                console.log('Enable to find your location')
+                console.log('Enable to find your location');
             });
         },
 
-        setNewPosition: function() {
+        updateUserCoordinates: function(coordinates) {
+
+          User.set({
+            coordinates: coordinates,
+            isFigured: true
+          });
 
         }
 
