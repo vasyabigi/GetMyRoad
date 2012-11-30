@@ -85,15 +85,17 @@ class Trip(models.Model):
     def __unicode__(self):
         return self.name
 
-    def fetch_places(self, oauth_token):
+    def fetch_places(self):
         '''fetch places from facebook from give circle'''
+
+        social_user = self.user.social_auth.get()
 
         path = 'https://graph.facebook.com/search?%s' % urllib.urlencode({
             'fields': 'id',
             'type': 'place',
             'center': "%f,%f" % (self.lat, self.lon),
             'distance': "%.0f" % self.RADIUS,
-            'access_token': oauth_token,
+            'access_token': social_user.extra_data['access_token'],
             'limit': 500
         })
         logger.debug(u'Trying to get places list from Facebook with url: %s' % path)
@@ -158,7 +160,7 @@ class Trip(models.Model):
                 .order_by('-rank')[:10]
         route, time = find(
             self.lat, self.lon, categories, places,
-            timedelta(seconds=3600*10)
+            timedelta(seconds=3600 * 10)
         )
         now = datetime.now()
         for point in route:
@@ -170,6 +172,7 @@ class Trip(models.Model):
                     point.time
                 )
             )
+
 
 class TripPoint(models.Model):
     trip = models.ForeignKey(Trip, related_name="points")

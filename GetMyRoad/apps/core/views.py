@@ -24,13 +24,20 @@ def find_places(request):
     # request.POST['lat'], request.POST['lng']
 
     # Place for Anton job
-    trip = Trip.objects.get(name="test")
+    if request.user.is_authenticated():
+        trip, created = Trip.objects.get_or_create(
+            user=request.user,
+            lat=float(request.POST['lat']),
+            lon=float(request.POST['lng'])
+        )
+        trip.fetch_places()
+        trip.find_route(set([
+            273819889375819, 200600219953504, 192511100766680, 133436743388217,
+            209889829023118
+        ]))
 
-    places = trip.points.values('place__lat', 'place__lon').order_by('place__lon')
+    places = trip.points.values('place__lat', 'place__lon')
 
-    # context = {
-    #     'places': places,
-    # }
     return Response(places)
 
 
