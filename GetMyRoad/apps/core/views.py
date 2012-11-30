@@ -17,16 +17,13 @@ def logout(request):
     return redirect('home')
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 def select_categories(request):
-    # request.POST['lat'], request.POST['lng']
-
-    # Place for Anton job
     if request.user.is_authenticated():
         trip = Trip.objects.create(
             user=request.user,
-            lat=float(request.POST['lat']),
-            lon=float(request.POST['lng'])
+            lat=float(request.GET['lat']),
+            lon=float(request.GET['lng'])
         )
         trip.fetch_places()
     return Response({
@@ -38,7 +35,7 @@ def select_categories(request):
     })
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 def find_places(request):
     places = None
 
@@ -46,9 +43,9 @@ def find_places(request):
     if request.user.is_authenticated():
         trip, created = Trip.objects.get_or_create(
             user=request.user,
-            id=float(request.POST['id']),
+            id=float(request.GET['id']),
         )
-        trip.find_route(set([int(el) for el in request.POST.getlist('categories[]')]))
+        trip.find_route(set([int(el) for el in request.GET.getlist('categories[]')]))
 
         places = trip.points.values('place__lat', 'place__lon', 'place__name', 'place__id')
     else:

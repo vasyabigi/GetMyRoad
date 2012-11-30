@@ -13,7 +13,9 @@ define([
   // Views
   'views/categories',
 
-  'vendor/csrf'
+  'vendor/csrf',
+
+  'leafletPlugins'
 
 ], function($, _, Backbone, L, user, Trip, categories, CategoriesView) {
 
@@ -49,8 +51,7 @@ define([
             this.infoBlock.addTo(map);
 
             //-- Create FindMe Control
-            this.findMeControl = this.createFindMeControl();
-            this.findMeControl.addTo(map);
+            this.findMeControl = L.control.locate().addTo(map);
 
             //-- Find my location
             this.getMyLocation();
@@ -62,19 +63,67 @@ define([
                     self.updateUserCoordinates(data.latlng);
                 }
             });
+
+            var setNewPosControl = self.createSetNewPosControl();
+            setNewPosControl.addTo(map)
+
+
+
+            map.on('click', function (data) {
+                if (!user.get('isFigured')) {
+                    self.position = L.marker(data.latlng).bindPopup('New position').addTo(map);
+                    self.updateUserCoordinates(data.latlng);
+                }
+            });
+
         },
+
+        createSetNewPosControl: function() {
+            var self = this,
+                map = self.map;
+
+            var setNew = L.control({
+                position: 'topleft'
+            });
+
+            setNew.onAdd = function(map) {
+                var wrapper = L.DomUtil.create('div', 'leaflet-setnew-control-locate-wrap');
+                var link = L.DomUtil.create('a', 'leaflet-setnew-control-locate', wrapper);
+                link.href = '#';
+                link.id = '#set-new-pos'
+                link.title = 'Show me where I am';
+
+                L.DomEvent
+                    .on(link, 'click', L.DomEvent.stopPropagation)
+                    .on(link, 'click', L.DomEvent.preventDefault)
+                    .on(link, 'click', function() {
+                        self.setNewPosition()
+                    })
+
+                return wrapper;
+            };
+
+            return setNew;
+        },
+
 
         addCategories: function() {
           var coordinates = user.get('coordinates');
 
           $.ajax({
-            type: "POST",
+            type: "GET",
             url: 'select-categories/',
             async: false,
             dataType: 'json',
             data: {
               "lat": coordinates.lat,
               "lng": coordinates.lng
+            },
+            beforeSend: function(){
+                $('#spinner').fadeToggle();
+            },
+            success: function() {
+                $('#spinner').fadeToggle();
             }
           }).then(function(contents) {
 
@@ -111,60 +160,19 @@ define([
           return infoBlock;
         },
 
-        createFindMeControl: function() {
-            var self = this,
-                map = self.map;
-
-            var findMe = L.control({
-                position: 'topleft'
-            });
-
-            findMe.onAdd = function(map) {
-                var wrapper = L.DomUtil.create('div', 'leaflet-control-locate-wrap');
-                var link = L.DomUtil.create('a', 'leaflet-control-locate', wrapper);
-                link.href = '#';
-                link.title = 'Show me where I am';
-
-                L.DomEvent
-                    .on(link, 'click', L.DomEvent.stopPropagation)
-                    .on(link, 'click', L.DomEvent.preventDefault)
-                    .on(link, 'click', function() {
-                        self.getMyLocation();
-                    });
-
-                return wrapper;
-            };
-
-            return findMe;
-        },
-
         getMyLocation: function() {
             var self = this,
                 map = this.map;
 
-            map.locate({setView: true, maxZoom: 13});
+            map.locate({setView: true, maxZoom: 15});
 
             map.on('locationfound', function(data) {
-                if (self.currentPos) return;
-
-                var circleOptions = {
-                        color: 'green',
-                        fillColor: 'green',
-                        fillOpacity: 0.5
-                    },
-                    markerOptions = {
-                        color: 'green',
-                        fillColor: 'green',
-                        fillOpacity: 0.7,
-                        radius: 4
-                    };
 
                 user.set({currentPos: data.latlng});
 
-                var accurCircle = L.circle(data.latlng, data.accuracy/2, circleOptions),
-                    meMarker = L.circleMarker(data.latlng, markerOptions).bindPopup("You are within " + (data.accuracy/2).toFixed(0) + " meters from this point");
-                self.currentPos = L.layerGroup([accurCircle, meMarker]).addTo(map);
-
+                // var accurCircle = L.circle(data.latlng, data.accuracy, circleOptions),
+                //     meMarker = L.circleMarker(data.latlng, markerOptions).bindPopup("You are within " + (data.accuracy).toFixed(0) + " meters from this point");
+                // self.currentPos = L.layerGroup([accurCircle, meMarker]).addTo(map);
 
                 self.position = L.marker(data.latlng).addTo(map);
 
@@ -218,7 +226,7 @@ define([
                     coordinates = user.get('coordinates');
 
                 $.ajax({
-                  type: "POST",
+                  type: "GET",
                   url: 'find-places/',
                   async: false,
                   dataType: 'json',

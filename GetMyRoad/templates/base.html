@@ -13,6 +13,7 @@
     <meta name="viewport" content="width=device-width">
 
     <link rel="stylesheet" href="{{ STATIC_URL }}css/leaflet.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/leafletPlugins.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css">
 
@@ -47,6 +48,7 @@
       {% block content %}
       {% endblock content %}
     </div>
+    <div id="spinner"></div>
 
     <script data-main="{{ STATIC_URL }}js/main" src="{{ STATIC_URL }}js/vendor/require-min.js"></script>
   </body>
