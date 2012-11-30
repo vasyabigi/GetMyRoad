@@ -89,6 +89,7 @@ INSTALLED_APPS = (
 
     # Plugins:
     'south',
+    'social_auth',
 
     # Apps:
     'core',
@@ -130,6 +131,23 @@ LOGGING = {
         },
     }
 }
+
+# Django social auth
+AUTHENTICATION_BACKENDS = (
+    'social_auth.backends.facebook.FacebookBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+LOGIN_URL = '/'
+LOGIN_REDIRECT_URL = '/'
+LOGIN_ERROR_URL = '/'
+
+SOCIAL_AUTH_SESSION_EXPIRATION = False
+# SOCIAL_AUTH_USER_MODEL = 'myapp.CustomUser'
+
+# For testing
+FACEBOOK_APP_ID = '107790869310294'
+FACEBOOK_API_SECRET = 'b9bef1509c775d7a7b788e15badfe5cf'
 
 LOCAL_INSTALLED_APPS = LOCAL_MIDDLEWARE_CLASSES = tuple()
 

@@ -3,3 +3,5 @@ south
 django-debug-toolbar
 django-extensions
 werkzeug
+
+django-social-auth
