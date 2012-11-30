@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     url(r'', include('core.urls')),
     url(r'^$', home, name="home"),
     url(r'^find-places/$', find_places, name="find-places"),
+    url(r'^select-categories/$', find_places, name="select-categories"),
     url(r'^build-road/$', build_road, name="build-road"),
     url(r'^logout/$', logout, name='logout'),
 )

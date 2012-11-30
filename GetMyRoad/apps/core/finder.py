@@ -1,4 +1,7 @@
 import logging
+import math
+
+from core.models import Place, TripPoint
 from collections import deque
 
 
@@ -59,9 +62,9 @@ def find(lat, lon, categories, places, time_limit):
     '''
 
     def sort_by(values):
-        # we don't care about 5 minutes different
+        # we don't care about 15 minutes different
         # rank is more important in this situation
-        return int(values[0].total_seconds() / 5 / 60), values[1]
+        return math.ceil(values[0].total_seconds() / 5.0 / 60.0) * 5 * 60, values[1]
 
     # in each step we are adding PARALLEL_PLACES_COUNT most close point to our que
     q = deque([])
