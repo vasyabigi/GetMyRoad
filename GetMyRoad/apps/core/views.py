@@ -1,12 +1,12 @@
 from cloudmade import routing
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from models import Trip
 
 router = routing.Router("f3f25538fbae4777b3e2c8ff3f6d53f5", "navigation.cloudmade.com")
-
 
 def home(request):
     return render(request, 'core/home.html')
