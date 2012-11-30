@@ -12,7 +12,13 @@ define([
             lng: null
         },
 
-        isFigured: false
+        isFigured: false,
+
+        currentPos: {
+            lat: null,
+            lng: null
+        }
+
     },
 
     getLatLng: function() {

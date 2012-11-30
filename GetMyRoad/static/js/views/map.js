@@ -9,7 +9,7 @@ define([
   'models/user',
   'collections/trip',
 
-  'csrf'
+  'vendor/csrf'
 
 ], function($, _, Backbone, L, user, Trip) {
 
@@ -84,12 +84,19 @@ define([
             });
 
             findMe.onAdd = function(map) {
-
-                var container = L.DomUtil.create('div', 'leaflet-control-locate');
-                var wrapper = L.DomUtil.create('div', 'leaflet-control-locate-wrap', container);
+                var wrapper = L.DomUtil.create('div', 'leaflet-control-locate-wrap');
                 var link = L.DomUtil.create('a', 'leaflet-control-locate', wrapper);
                 link.href = '#';
                 link.title = 'Show me where I am';
+
+                L.DomEvent
+                    .on(link, 'click', L.DomEvent.stopPropagation)
+                    .on(link, 'click', L.DomEvent.preventDefault)
+                    .on(link, 'click', function() {
+                        self.getMyLocation();
+                    })
+
+                return wrapper;
             };
 
             return findMe;
@@ -99,19 +106,31 @@ define([
             var self = this,
                 map = this.map;
 
-            map.locate({setView: true, maxZoom: 15});
+            map.locate({setView: true, maxZoom: 13});
 
             map.on('locationfound', function(data) {
+                if (self.currentPos) return;
+
                 var circleOptions = {
-                    color: 'green',
-                    fillColor: 'green',
-                    fillOpacity: 0.5
-                };
+                        color: 'green',
+                        fillColor: 'green',
+                        fillOpacity: 0.5
+                    },
+                    markerOptions = {
+                        color: 'green',
+                        fillColor: 'green',
+                        fillOpacity: 0.7,
+                        radius: 4
+                    }
 
-                var accurCircle = L.circle(data.latlng, data.accuracy, circleOptions),
-                    meMarker = L.marker(data.latlng).bindPopup("You are here");
+                user.set({currentPos: data.latlng});
 
-                self.position = L.layerGroup([accurCircle, meMarker]).addTo(map);
+                var accurCircle = L.circle(data.latlng, data.accuracy/2, circleOptions),
+                    meMarker = L.circleMarker(data.latlng, markerOptions).bindPopup("You are within " + (data.accuracy/2).toFixed(0) + " meters from this point");
+                self.currentPos = L.layerGroup([accurCircle, meMarker]).addTo(map);
+
+
+                self.position = L.marker(data.latlng).addTo(map);
 
                 self.updateUserCoordinates(data.latlng);
             });
@@ -122,8 +141,6 @@ define([
         },
 
         setNewPosition: function() {
-
-            console.log(user);
 
             this.map.removeLayer(this.position);
 
