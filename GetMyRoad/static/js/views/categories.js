@@ -23,15 +23,15 @@ define([
       categories.on('add', this.render, this);
     },
     sliderToggle : function(){
-        alert('hello');
+        this.$el.toggleClass('toggled');
     },
 
     render: function() {
       var self = this;
-      self.$el.html("");
+      self.$el.find('#categories').html("");
       categories.each(function(el) {
           elView = new CategoryView({ model: el });
-          self.$el.prepend(elView.render().el);
+          self.$el.find('#categories').prepend(elView.render().el);
       });
     }
 
