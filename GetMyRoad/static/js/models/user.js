@@ -12,7 +12,8 @@ define([
             lng: null
         },
 
-        isFigured: false
+        isFigured: false,
+        isGotTheRoad: false
     },
 
     getLatLng: function() {

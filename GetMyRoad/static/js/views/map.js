@@ -64,7 +64,7 @@ define([
 
           //-- use self.infoBlock.update(your_data_to_display);
           infoBlock.update = function (data) {
-              this._div.innerHTML = data ? data : '';
+              this._div.innerHTML = data ? data : 'Choose start point.';
           };
 
           return infoBlock;
@@ -98,7 +98,6 @@ define([
 
         setNewPosition: function() {
 
-            console.log(user);
 
             this.map.removeLayer(this.position);
 
@@ -118,40 +117,48 @@ define([
             if (user.get('isFigured')) {
                 this.infoBlock.update('Ready to find a road.');
             } else {
-                this.infoBlock.update('Need to choose start position.');
+                this.infoBlock.update('Choose new start position.');
             }
         },
 
         fetchPlaces: function() {
-            var self = this,
-                coordinates = user.get('coordinates');
-            $.ajax({
-              type: "POST",
-              url: 'find-places/',
-              async: false,
-              dataType: 'json',
-              data: {
-                "lat": coordinates.lat,
-                "lng": coordinates.lng
-              }
-            }).then(function(contents) {
-                var trip = new Trip(),
-                    data = [];
+            console.log(user.get('isGotTheRoad'));
 
-                trip.on('add', self.addPlaceMarker, self);
+            if (!user.get('isGotTheRoad')) {
 
-                $.each(contents, function(i, e) {
-                    data[i] = {
-                      'order': i,
-                      'lat': e.place__lat,
-                      'lng': e.place__lon,
-                      'name': e.place__name,
-                      'id': e.place__id
-                    };
+                var self = this,
+                    coordinates = user.get('coordinates');
+
+                $.ajax({
+                  type: "POST",
+                  url: 'find-places/',
+                  async: false,
+                  dataType: 'json',
+                  data: {
+                    "lat": coordinates.lat,
+                    "lng": coordinates.lng
+                  }
+                }).then(function(contents) {
+                    var trip = new Trip(),
+                        data = [];
+
+                    trip.on('add', self.addPlaceMarker, self);
+
+                    $.each(contents, function(i, e) {
+                        data[i] = {
+                          'order': i,
+                          'lat': e.place__lat,
+                          'lng': e.place__lon,
+                          'name': e.place__name,
+                          'id': e.place__id
+                        };
+                    });
+                    trip.add(data);
+                    self.buildRoad(trip);
                 });
-                trip.add(data);
-                self.buildRoad(trip);
-            });
+
+                user.set({'isGotTheRoad': true });
+            }
         },
 
         addPlaceMarker: function(place) {
