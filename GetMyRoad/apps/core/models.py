@@ -80,6 +80,9 @@ class Trip(models.Model):
     places = models.ManyToManyField(
         'Place', blank=True, null=True, related_name='trips'
     )
+    categories = models.ManyToManyField(
+        'Category', blank=True, null=True, related_name='trips'
+    )
 
     RADIUS = 50000
 
@@ -149,6 +152,7 @@ class Trip(models.Model):
                             name=cat_data['name']
                         )
                         place.categories.add(cat)
+                        trip.categories.add(cat)
                 self.places.add(place)
 
     def find_route(self, categories):
@@ -160,7 +164,7 @@ class Trip(models.Model):
         for cat in categories:
             # TODO: add distance filtering
             places[cat] = self.places.filter(categories=cat) \
-                .order_by('-rank')[:15]
+                .order_by('-rank')[:10]
         route, time = find(
             self.lat, self.lon, categories, places,
             timedelta(seconds=3600 * 10)
