@@ -13,3 +13,4 @@ django-filter
 
 requests
 cloudmade
+python-dateutil
