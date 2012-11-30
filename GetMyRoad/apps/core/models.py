@@ -49,7 +49,7 @@ class Place(models.Model):
         # TODO: Replace with google api calls
         lat1, lon1 = float(self.lat), float(self.lon)
         lat2, lon2 = float(lat), float(lon)
-        radius = 6371.0 # km
+        radius = 6371.0  # km
 
         dlat = math.radians(lat2-lat1)
         dlon = math.radians(lon2-lon1)

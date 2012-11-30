@@ -144,7 +144,9 @@ define([
                     data[i] = {
                       'order': i,
                       'lat': e.place__lat,
-                      'lng': e.place__lon
+                      'lng': e.place__lon,
+                      'name': e.place__name,
+                      'id': e.place__id
                     };
                 });
                 trip.add(data);
@@ -154,7 +156,7 @@ define([
 
         addPlaceMarker: function(place) {
             console.log(place.toJSON());
-            L.marker(place.getLatLng()).addTo(this.map);
+            L.marker(place.getLatLng()).bindPopup(place.get('name')).addTo(this.map);
         },
 
         buildRoad: function(trip) {
