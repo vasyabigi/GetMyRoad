@@ -65,23 +65,25 @@ define([
             this.polylines = [];
 
             //-- Set New Position
+            var snowIcon = L.icon({
+                iconUrl: '/static/css/images/snowmanMarker.gif',
+                shadowUrl: '/static/css/images/marker-shadow.png',
+                iconAnchor: [15, 30],
+                shadowAnchor: [10, 50],
+                popupAnchor:  [0, -30]
+            })
+            this.snowIcon = snowIcon;
+
             map.on('click', function(data){
                 if (!user.get('isFigured')) {
-                    self.position = L.marker(data.latlng).addTo(map);
+                    self.position = L.marker(data.latlng, {icon: snowIcon}).bindPopup('Start').addTo(map);
                     self.updateUserCoordinates(data.latlng);
                 }
             });
 
             var setNewPosControl = self.createSetNewPosControl();
+
             setNewPosControl.addTo(map);
-
-            map.on('click', function (data) {
-                if (!user.get('isFigured')) {
-                    self.position = L.marker(data.latlng).bindPopup('New position').addTo(map);
-                    self.updateUserCoordinates(data.latlng);
-                }
-            });
-
         },
 
         createSetNewPosControl: function() {
@@ -137,6 +139,8 @@ define([
             }
           }).then(function(contents) {
 
+              categories.remove(categories.models);
+
               var data = [];
 
               $.each(contents.categories, function(i, e) {
@@ -189,7 +193,7 @@ define([
                 //     meMarker = L.circleMarker(data.latlng, markerOptions).bindPopup("You are within " + (data.accuracy).toFixed(0) + " meters from this point");
                 // self.currentPos = L.layerGroup([accurCircle, meMarker]).addTo(map);
 
-                self.position = L.marker(data.latlng).addTo(map);
+                self.position = L.marker(data.latlng, {icon: self.snowIcon}).addTo(map);
 
                 self.updateUserCoordinates(data.latlng);
             });
