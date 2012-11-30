@@ -232,7 +232,7 @@ define([
 
         fetchPlaces: function() {
 
-            this.clearObjects();    
+            this.clearObjects();
 
             var activatedCategories = [];
             categories.each(function(category) {
@@ -267,7 +267,8 @@ define([
                       'lat': e.place__lat,
                       'lng': e.place__lon,
                       'name': e.place__name,
-                      'id': e.place__id
+                      'id': e.place__id,
+                      'img': e.place__pic_small
                     };
                 });
                 trip.add(data);
@@ -279,10 +280,10 @@ define([
         },
 
         addPlaceMarker: function(place) {
-            console.log(place.toJSON());
-            var marker = L.marker(place.getLatLng()).bindPopup(place.get('name'))
+            var marker = L.marker(place.getLatLng()).bindPopup('<p>' + place.get('name') + '<img src="'+ place.get('img') + '"></p>');
             this.markers.push(marker);
             marker.addTo(this.map);
+            marker.openPopup();
         },
 
         buildRoad: function(trip) {
