@@ -240,7 +240,7 @@ define([
 
                     trip.on('add', self.addPlaceMarker, self);
 
-                    $.each(contents, function(i, e) {
+                    $.each(contents.places, function(i, e) {
                         data[i] = {
                           'order': i,
                           'lat': e.place__lat,
@@ -251,6 +251,7 @@ define([
                     });
                     trip.add(data);
                     self.buildRoad(trip);
+                    alert(contents.summary);
                 });
 
                 user.set({'isGotTheRoad': true });

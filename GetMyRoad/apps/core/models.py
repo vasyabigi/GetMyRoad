@@ -136,6 +136,9 @@ class Trip(models.Model):
     categories = models.ManyToManyField(
         'Category', blank=True, null=True, related_name='trips'
     )
+    estimated_time = models.CharField(
+        blank=True, null=True, max_length=50
+    )
 
     RADIUS = 50000
 
@@ -224,6 +227,8 @@ class Trip(models.Model):
             self.lat, self.lon, categories, places,
             self.start, self.end
         )
+        self.estimated_time = unicode(time)
+        self.save()
         for point in route:
             TripPoint.objects.create(
                 trip=self,

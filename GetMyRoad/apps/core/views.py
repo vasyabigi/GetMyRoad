@@ -47,10 +47,19 @@ def find_places(request):
         )
         trip.find_route(set([int(el) for el in request.GET.getlist('categories[]')]))
 
-        places = trip.points.values('place__lat', 'place__lon', 'place__name', 'place__id')
+        places = trip.points.values(
+            'place__lat', 'place__lon', 'place__name', 'place__id',
+            'place__pic_small', 'place__price_range'
+        )
     else:
         places = []
-    return Response(places)
+    return Response({
+        'places': places,
+        'summary': 'Found route with %d places'
+            ' with estimated time to complete: %s' % (
+                len(places), trip.estimated_time
+            )
+    })
 
 
 @api_view(['POST'])
