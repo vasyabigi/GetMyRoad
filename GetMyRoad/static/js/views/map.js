@@ -287,7 +287,7 @@ define([
         },
 
         addPlaceMarker: function(place) {
-            var marker = L.marker(place.getLatLng()).bindPopup('<p>' + place.get('name') + '<img src="'+ place.get('img') + '"></p>');
+            var marker = L.marker(place.getLatLng()).bindPopup('<p><a href="https://www.facebook.com/' + place.get('id') + '">' + place.get('name') + '</a><img src="'+ place.get('img') + '"></p>');
             this.markers.push(marker);
             marker.addTo(this.map);
             marker.openPopup();
