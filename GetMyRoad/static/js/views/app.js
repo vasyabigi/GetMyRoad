@@ -27,12 +27,12 @@ define([
         this.$('.timepicker').datetimepicker();
         var date = new Date();
         this.$('#fromTime').val(
-            date.getMonth() + '/' + date.getDay() + '/' + date.getFullYear() +
+            (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear() +
             ' ' + date.getHours() + ':' + date.getMinutes()
         );
         date.setHours(date.getHours() + 8);
         this.$('#toTime').val(
-            date.getMonth() + '/' + date.getDay() + '/' + date.getFullYear() +
+            (date.getMonth()) + 1 + '/' + date.getDate() + '/' + date.getFullYear() +
             ' ' + date.getHours() + ':' + date.getMinutes()
         );
     }
