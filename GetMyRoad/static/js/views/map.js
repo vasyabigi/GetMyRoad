@@ -9,7 +9,7 @@ define([
   'models/user',
   'collections/trip',
 
-  'csrf'
+  'vendor/csrf'
 
 ], function($, _, Backbone, L, user, Trip) {
 
