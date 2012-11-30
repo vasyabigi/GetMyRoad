@@ -31,7 +31,10 @@ def select_categories(request):
         trip.fetch_places()
     return Response({
         'trip_id': trip.id,
-        'categories': [cat for cat in trip.categories.values('id', 'name')]
+        'categories': [
+            {'id': cat.id, 'name': cat.name} for cat in trip.categories.all() \
+            if cat.place_count > 2
+        ]
     })
 
 
