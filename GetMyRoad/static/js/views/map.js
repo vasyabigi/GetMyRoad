@@ -10,8 +10,11 @@ define([
 
         el: "#map",
 
+        events: {'click #set-new-pos': 'setNewPosition'},
+
         initialize: function() {
             var self = this;
+            self.map = map;
 
             var map = L.map('map', {
                 center: [50.451, 30.523],
@@ -22,10 +25,13 @@ define([
                 maxZoom: 18
             }).addTo(map);
 
-            self.getMyLocation(map);
+            self.getMyLocation();
         },
 
-        getMyLocation: function(map) {
+        getMyLocation: function() {
+            var self = this,
+                map = self.map;
+
             map.locate({setView: true, maxZoom: 15});
 
             map.on('locationfound', function(data) {
@@ -40,6 +46,10 @@ define([
             map.on('locationerror', function() {
                 console.log('Enable to find your location')
             });
+        },
+
+        setNewPosition: function() {
+
         }
 
   });
