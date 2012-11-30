@@ -34,7 +34,6 @@ define([
             map.on('click', function(data){
                 if (!User.get('isFigured')) {
 
-                    self.map.removeLayer(self.position);
                     self.position = L.marker(data.latlng).bindPopup("New Position").addTo(map);
 
                     self.updateUserCoordinates(data.latlng);
@@ -70,6 +69,8 @@ define([
 
         setNewPosition: function() {
             var self = this;
+
+            self.map.removeLayer(self.position);
             self.map.setZoom(10);
 
             User.set({isFigured: false});
