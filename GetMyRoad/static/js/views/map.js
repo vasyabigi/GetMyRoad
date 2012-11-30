@@ -108,7 +108,8 @@ define([
 
 
         addCategories: function() {
-          var coordinates = user.get('coordinates');
+          var self = this,
+              coordinates = user.get('coordinates');
 
           $.ajax({
             type: "GET",
@@ -138,6 +139,9 @@ define([
 
               categories.add(data);
               user.set({"tripId": contents.trip_id });
+
+              self.$('#find_places').show();
+              self.$('#sidebar-opener').trigger('click');
           });
 
         },
