@@ -35,8 +35,13 @@ define([
                 maxZoom: 18
             }).addTo(map);
 
+            //-- Create infoblock
             this.infoBlock = this.createInfoBlock();
             this.infoBlock.addTo(map);
+
+            //-- Create FindMe Control
+            this.findMeControl = this.createFindMeControl();
+            this.findMeControl.addTo(map);
 
             //-- Find my location
             this.getMyLocation();
@@ -66,6 +71,26 @@ define([
           };
 
           return infoBlock;
+        },
+
+        createFindMeControl: function() {
+            var self = this,
+                map = self.map;
+
+            var findMe = L.control({
+                position: 'topleft'
+            });
+
+            findMe.onAdd = function(map) {
+
+                var container = L.DomUtil.create('div', 'leaflet-control-locate');
+                var wrapper = L.DomUtil.create('div', 'leaflet-control-locate-wrap', container);
+                var link = L.DomUtil.create('a', 'leaflet-control-locate', wrapper);
+                link.href = '#';
+                link.title = 'Show me where I am';
+            };
+
+            return findMe;
         },
 
         getMyLocation: function() {
