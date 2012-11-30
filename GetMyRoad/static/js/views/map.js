@@ -29,14 +29,35 @@ define([
                 maxZoom: 18
             }).addTo(map);
 
+        //-- info block
+            var infoblock = L.control();
+
+            infoblock.onAdd = function (map) {
+                this._div = L.DomUtil.create('div', 'info'); // div with a class "info"
+                this.update();
+                return this._div;
+            };
+
+            //-- use self.infoblock.update(your_data_to_display);
+            infoblock.update = function (data) {
+                this._div.innerHTML = data ? data : 'Some info';
+            };
+
+            self.infoblock = infoblock;
+            self.infoblock.addTo(map);
+
+        //-- Find my location
             self.getMyLocation();
 
+        //-- Set New Position
             map.on('click', function(data){
                 if (!User.get('isFigured')) {
 
                     self.position = L.marker(data.latlng).bindPopup("New Position").addTo(map);
 
                     self.updateUserCoordinates(data.latlng);
+
+                    self.infoblock.update('you got new position!!!')
                 }
             });
         },
@@ -72,6 +93,7 @@ define([
 
             self.map.removeLayer(self.position);
             self.map.setZoom(10);
+            self.infoblock.update('put new marker position!!!')
 
             User.set({isFigured: false});
 
