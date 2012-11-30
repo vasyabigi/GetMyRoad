@@ -29,10 +29,9 @@ define([
     render: function() {
       var self = this;
       self.$el.find('#categories ul').html("");
-        console.log(categories);
       categories.each(function(el) {
-          elView = new CategoryView({ model: el });
-          self.$el.find('#categories ul').prepend(elView.render().el);
+          var elView = new CategoryView({ model: el });
+          self.$el.find('#categories ul').append(elView.render().el);
       });
     }
 

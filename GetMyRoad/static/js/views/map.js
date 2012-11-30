@@ -139,6 +139,8 @@ define([
             }
           }).then(function(contents) {
 
+              categories.remove(categories.models);
+
               var data = [];
 
               $.each(contents.categories, function(i, e) {
