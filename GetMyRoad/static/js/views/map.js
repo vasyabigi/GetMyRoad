@@ -12,28 +12,38 @@ define([
 
   var MapView = Backbone.View.extend({
 
-        el: "#map",
+        el: "#map-container",
 
         events: {'click #set-new-pos': 'setNewPosition'},
 
         initialize: function() {
             var self = this;
-            self.map = map;
+            this.meMarker = {};
 
             var map = L.map('map', {
                 center: [50.451, 30.523],
                 zoom: 13
             });
+            this.map = map;
 
             L.tileLayer('http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png', {
                 maxZoom: 18
             }).addTo(map);
 
             self.getMyLocation();
+
+            map.on('click', function(data){
+                if (User.get('isFigured')) {
+                    self.updateUserCoordinates(data.latlng);
+                    this.meMarker.setLatLng(data.latlng);
+                }
+            })
         },
 
-        getMyLocation: function(map) {
-            var self = this;
+        getMyLocation: function() {
+            var self = this,
+                map = self.map,
+                meMarker = self.meMarker;
 
             map.locate({setView: true, maxZoom: 15});
 
@@ -44,7 +54,8 @@ define([
                     fillOpacity: 0.5
                 };
                 L.circle(data.latlng, data.accuracy, circleOptions).addTo(map);
-                L.marker(data.latlng).bindPopup("You are here").addTo(map);
+
+                meMarker = L.marker(data.latlng).bindPopup("You are here").addTo(map);
 
                 self.updateUserCoordinates(data.latlng);
             });
@@ -54,12 +65,18 @@ define([
             });
         },
 
+        setNewPosition: function() {
+
+            User.set({isFigured: false});
+
+        },
+
         updateUserCoordinates: function(coordinates) {
 
-          User.set({
-            coordinates: coordinates,
-            isFigured: true
-          });
+            User.set({
+                coordinates: coordinates,
+                isFigured: true
+            });
 
         }
 
