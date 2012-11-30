@@ -19,7 +19,7 @@ define([
 
   var MapView = Backbone.View.extend({
 
-        el: "#map-container",
+        el: "body",
 
         events: {
           'click #set-new-pos': 'setNewPosition',
@@ -66,6 +66,7 @@ define([
 
         addCategories: function() {
           var coordinates = user.get('coordinates');
+
           $.ajax({
             type: "POST",
             url: 'select-categories/',
@@ -89,6 +90,7 @@ define([
               categories.add(data);
               user.set({"tripId": contents.trip_id });
           });
+
         },
 
         createInfoBlock: function() {
