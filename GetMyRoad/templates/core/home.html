@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div id="map-container" class="well clearfix">
-        <div id="map" style="height: 500px; width: 700px"></div>
-        <button id="set-new-pos" class="btn">Set New Position</button>
-        <button id="get_categories" class="btn">Fetch categories</button>
-        <button id="find_places" class="btn">Get places</button>
-        <ul id="categories"></ul>
+
+<div id="map-container" class="clearfix">
+    <div id="map" style="height: 100%; width: 100%"></div>
+    <div class="leaflet-control-container" style="top: 125px;position: absolute;">
+        <div class="leaflet-top leaflet-left">
+            <div class="leaflet-control-zoom leaflet-control">
+                <a class="leaflet-control-new-pos" href="#" id="set-new-pos" title="New position"></a>
+            </div>
+        </div>
     </div>
+
+</div>
 {% endblock content %}
