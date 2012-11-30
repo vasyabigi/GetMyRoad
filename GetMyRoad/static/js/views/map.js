@@ -71,7 +71,7 @@ define([
                 iconAnchor: [15, 30],
                 shadowAnchor: [10, 50],
                 popupAnchor:  [0, -30]
-            })
+            });
             this.snowIcon = snowIcon;
 
             map.on('click', function(data){
@@ -117,7 +117,9 @@ define([
 
         addCategories: function() {
 
-          console.log('here');
+          var from = this.$('#fromTime'),
+              to = this.$('#toTime');
+
           var self = this,
               coordinates = user.get('coordinates');
 
@@ -128,7 +130,9 @@ define([
             dataType: 'json',
             data: {
               "lat": coordinates.lat,
-              "lng": coordinates.lng
+              "lng": coordinates.lng,
+              "start": from.val(),
+              "end": to.val()
             },
             beforeSend: function(){
                 $('#spinner').fadeIn();
@@ -334,7 +338,7 @@ define([
               data: data,
               dataType: 'json'
           }).then(function(data) {
-              var polyline = L.polyline(data.route_geometry, {color: 'blue'})
+              var polyline = L.polyline(data.route_geometry, {color: 'blue'});
               polyline.addTo(self.map);
               self.polylines.push(polyline);
           });
