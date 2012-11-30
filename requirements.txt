@@ -10,3 +10,5 @@ djangorestframework
 markdown
 pyyaml
 django-filter
+
+requests

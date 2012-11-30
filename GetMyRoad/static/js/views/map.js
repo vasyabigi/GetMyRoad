@@ -6,20 +6,22 @@ define([
   'leaflet',
 
   // Models
-  'models/user'
+  'models/user',
+  'collections/trip'
 
-], function($, _, Backbone, L, User) {
+], function($, _, Backbone, L, user, Trip) {
 
   var MapView = Backbone.View.extend({
 
         el: "#map-container",
 
         events: {
-          'click #set-new-pos': 'setNewPosition'
+          'click #set-new-pos': 'setNewPosition',
+          'click #find_places': 'fetchPlaces'
         },
 
         initialize: function() {
-            User.on('change:isFigured', this.updateMapControl, this);
+            user.on('change:isFigured', this.updateMapControl, this);
 
             var self = this,
                 map = L.map('map', {
@@ -41,7 +43,7 @@ define([
 
             //-- Set New Position
             map.on('click', function(data){
-                if (!User.get('isFigured')) {
+                if (!user.get('isFigured')) {
                     self.position = L.marker(data.latlng).addTo(map);
                     self.updateUserCoordinates(data.latlng);
                 }
@@ -94,30 +96,100 @@ define([
 
         setNewPosition: function() {
 
-            console.log(User);
+            console.log(user);
 
             this.map.removeLayer(this.position);
 
             this.map.setZoom(10);
 
-            User.set({ isFigured: false });
+            user.set({ isFigured: false });
         },
 
         updateUserCoordinates: function(coordinates) {
-            User.set({
+            user.set({
                 coordinates: coordinates,
                 isFigured: true
             });
         },
 
         updateMapControl: function() {
-            if (User.get('isFigured')) {
+            if (user.get('isFigured')) {
                 this.infoBlock.update('Ready to find a road.');
             } else {
                 this.infoBlock.update('Need to choose start position.');
             }
-        }
+        },
 
+        fetchPlaces: function() {
+            var self = this,
+                coordinates = user.get('coordinates');
+            $.ajax({
+              type: "POST",
+              url: 'find-places/',
+              async: false,
+              dataType: 'json',
+              data: {
+                "lat": coordinates.lat,
+                "lng": coordinates.lng
+              }
+            }).then(function(contents) {
+                var trip = new Trip(),
+                    data = [];
+
+                trip.on('add', self.addPlaceMarker, self);
+
+                $.each(contents, function(i, e) {
+                    data[i] = {
+                      'order': i,
+                      'lat': e.place__lat,
+                      'lng': e.place__lon
+                    };
+                });
+                trip.add(data);
+                self.buildRoad(trip);
+            });
+        },
+
+        addPlaceMarker: function(place) {
+            console.log(place.toJSON());
+            L.marker(place.getLatLng()).addTo(this.map);
+        },
+
+        buildRoad: function(trip) {
+          var self = this;
+          var presentPoint = user.getLatLng();
+          trip.each(function(place) {
+
+              // Build piece of road
+              self.buildRoadPice(presentPoint, place.getLatLng());
+
+              // Make last poin active
+              presentPoint = place.getLatLng();
+          });
+          self.buildRoadPice(presentPoint, user.getLatLng());
+
+        },
+
+        buildRoadPice: function(start, end) {
+          var self = this;
+
+          console.log(this);
+          var data = {
+              "start_lat": start.lat,
+              "start_lng": start.lng,
+              "end_lat": end.lat,
+              "end_lng": end.lng
+          };
+
+          $.ajax({
+              type: "POST",
+              url: 'build-road/',
+              data: data,
+              dataType: 'json'
+          }).then(function(data) {
+              L.polyline(data.route_geometry, {color: 'blue'}).addTo(self.map);
+          });
+        }
   });
 
   return MapView;

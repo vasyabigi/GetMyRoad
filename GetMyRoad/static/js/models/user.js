@@ -13,6 +13,13 @@ define([
         },
 
         isFigured: false
+    },
+
+    getLatLng: function() {
+        return {
+            lat: this.get('coordinates').lat,
+            lng: this.get('coordinates').lng
+        };
     }
 
   });
