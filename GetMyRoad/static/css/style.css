@@ -190,16 +190,17 @@ body {
 
 .category-sidebar{
     position: absolute;
-    z-index: 100;
-    top:50%;
-    right: 0;
-    margin-top: -150px;
-    background: white;
-    width: 300px;
-    height: 300px;
-    right: -250px;
-
+    z-index: 2;
+    right: 0px;
+    top: 0px;
+    background: transparent;
+    width: 400px;
+    height: 100%;
+    right: -360px;
+    height: 100%;
+    padding-top: 50px;
 }
+
 .animated{
     transition: right 0.5s;
     -moz-transition: right 0.5s; /* Firefox 4 */
@@ -212,30 +213,84 @@ body {
 }
 
 .sidebar-opener-wrapper{
-    background: red;
-    width: 50px;
-    height: 100%;
+    cursor: pointer;
+    background-color: #1B1B1B;
+    position: absolute;
     display: block;
-    float: left;
-    right: -250px;
+    top:50%;
+    border-radius: 10px 0 0 10px;
+    height: 140px;
+    width: 40px;
+    opacity: 0.67;
+    box-shadow: -1px 2px 6px #222;
 }
+
 .sidebar-opener{
+    padding-top: 2em;
+}
+
+.sidebar-opener span {
+    position: absolute;
+    font-size: 20px;
+    font-weight: bold;
+    height: 4.3em;
     writing-mode: tb-rl;
     filter: flipv fliph;
     -webkit-transform:rotate(-90deg);
+    color: white;
     white-space:nowrap;
-    display:block;
-    width: 100%;
-    text-align: center;
-    height: 100%;
-    height: 19px;
-    margin-top: 150px;
+    display: block;
 }
 
+
 .categories-wrapper{
-    background: green;
+    opacity: 0.9;
+    background-color: #1B1B1B;
+    background-image: -moz-linear-gradient(left,#555,#000);
+    background-image: -webkit-gradient(linear,0 0,100% 0,from(#555),to(#000));
+    background-image: -webkit-linear-gradient(left,#555,#000);
+    background-image: -o-linear-gradient(left,#555,#000);
+    background-image: linear-gradient(to right,#555,#000);
+    background-repeat: repeat-x;
+    border-color: #252525;
+
     display: block;
-    width: 250px;
+    width: 360px;
     height: 100%;
-    float: left;
+    margin-left: 40px;
+}
+
+.categories{
+    overflow-y: auto;
+    height: 100%;
+    display: block;
+    position: relative;
+}
+
+.categories ul{
+    padding: 35px 0px;
+    color: white;
+    list-style: none;
+}
+
+.categories ul li {
+    cursor: pointer;
+    line-height: 20px;
+    margin: 10px 0;
+    width: 295px;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+
+.categories ul li:hover {
+   background: #777;
+}
+
+.alg{
+    position: absolute;
+    left: 50%;
+    margin-left: -50px;
+    width:170px;
+    margin-top: 0.8em;
 }

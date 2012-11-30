@@ -146,6 +146,7 @@ define([
 
               self.$('#find_places').show();
               self.$('#sidebar-opener').trigger('click');
+              self.$('#category-sidebar').addClass('toggled');
           });
 
         },
