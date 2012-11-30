@@ -2,7 +2,7 @@ define([
     'underscore',
     'backbone',
 
-    'models/Category'
+    'models/category'
 ], function(_, Backbone, Category) {
 
   var Categories = Backbone.Collection.extend({
