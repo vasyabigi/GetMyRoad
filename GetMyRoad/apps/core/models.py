@@ -6,7 +6,7 @@ import math
 
 from django.db import models
 from django.contrib.auth.models import User
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 
 logger = logging.getLogger("gmr.%s" % __name__)
@@ -36,8 +36,8 @@ class Place(models.Model):
     pic_small = models.CharField(blank=True, null=True, max_length=250)
     price_range = models.CharField(blank=True, null=True, max_length=250)
     phone = models.CharField(blank=True, null=True, max_length=250)
-    lat = models.FloatField('Lat')
-    lon = models.FloatField('Lng')
+    lat = models.DecimalField('Lat', decimal_places=15, max_digits=50)
+    lon = models.DecimalField('Lng', decimal_places=15, max_digits=50)
 
     class Meta:
         ordering = ['rank']
@@ -45,11 +45,11 @@ class Place(models.Model):
     def __unicode__(self):
         return self.name
 
-    def get_time_to_get(self, lat, lon):
+    def get_time_to_get(self, lat, lon, reverse=False):
         # TODO: Replace with google api calls
-        lat1, lon1 = self.lat, self.lon
-        lat2, lon2 = lat, lon
-        radius = 6371 # km
+        lat1, lon1 = float(self.lat), float(self.lon)
+        lat2, lon2 = float(lat), float(lon)
+        radius = 6371.0 # km
 
         dlat = math.radians(lat2-lat1)
         dlon = math.radians(lon2-lon1)
@@ -58,7 +58,14 @@ class Place(models.Model):
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
         d = radius * c
 
-        return d / 40
+        res = timedelta(seconds=int((d / 40.) * 3600.))
+        return res
+
+    def get_avg_spend_time(self, current_time=None):
+        '''avg time people spends in this place'''
+
+        return timedelta(seconds=3600*2)
+
 
 class TripManager(models.Manager):
     pass
@@ -141,22 +148,37 @@ class Trip(models.Model):
 
     def find_route(self, categories):
         from core.finder import find
+
+        # deleting old trip point, if exist
+        self.points.all().delete()
         places = {}
         for cat in categories:
             # TODO: add distance filtering
             places[cat] = Place.objects.filter(categories=cat) \
                 .order_by('-rank')[:10]
-        route = find(
+        route, time = find(
             self.lat, self.lon, categories, places,
-            timedelta(seconds=3600)
+            timedelta(seconds=3600*10)
         )
-        import ipdb; ipdb.set_trace()
+        now = datetime.now()
+        for point in route:
+            TripPoint.objects.create(
+                trip=self,
+                place=point.place,
+                arrive=now + point.time,
+                leave=now + point.time + point.place.get_avg_spend_time(
+                    point.time
+                )
+            )
 
 class TripPoint(models.Model):
     trip = models.ForeignKey(Trip, related_name="points")
     place = models.ForeignKey(Place, related_name="points")
     arrive = models.DateTimeField(blank=True, null=True)
     leave = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['arrive']
 
     def __unicode__(self):
         return '%s for %s' % (self.place, self.trip)
