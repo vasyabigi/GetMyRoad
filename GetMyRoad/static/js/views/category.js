@@ -28,7 +28,12 @@ define([
     },
 
     changeActivity: function() {
-      this.model.set({'activated': true });
+      if (this.model.get('activated')) {
+          this.model.set({'activated': false });
+      } else {
+          this.model.set({'activated': true });
+      }
+
     }
 
   });
