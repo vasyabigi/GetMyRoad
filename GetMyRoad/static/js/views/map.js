@@ -40,7 +40,7 @@ define([
                         fillOpacity: 0.5
                     };
 
-                    L.marker(data.latlng).bindPopup("You are here").addTo(map);
+                    self.position = L.marker(data.latlng).bindPopup("You are here").addTo(map);
 
                     self.updateUserCoordinates(data.latlng);
                 }
@@ -59,9 +59,9 @@ define([
                     fillColor: 'green',
                     fillOpacity: 0.5
                 };
-                L.circle(data.latlng, data.accuracy, circleOptions).addTo(map);
 
-                L.marker(data.latlng).bindPopup("You are here").addTo(map);
+                L.circle(data.latlng, data.accuracy, circleOptions).addTo(map);
+                self.position = L.marker(data.latlng).bindPopup("You are here").addTo(map);
 
                 self.updateUserCoordinates(data.latlng);
             });
@@ -74,6 +74,7 @@ define([
         setNewPosition: function() {
             User.set({isFigured: false});
             console.log(User);
+            console.log(this.position);
 
             // Delete old marker
         },
