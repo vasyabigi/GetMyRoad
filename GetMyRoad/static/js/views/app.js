@@ -9,6 +9,12 @@ define([
 
   var AppView = Backbone.View.extend({
 
+    el: 'body',
+
+    events: {
+      'click #find_places': 'fetchPlaces'
+    },
+
     Models: {},
     Collections: {},
     Views: {
@@ -17,6 +23,13 @@ define([
 
     initialize: function() {
       console.log('working');
+    },
+
+    fetchPlaces: function() {
+      $.ajax({ url: 'find-places/', async: false }).then(function(contents) {
+          data = contents;
+      });
+      console.log(data);
     }
 
   });

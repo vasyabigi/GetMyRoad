@@ -5,3 +5,8 @@ django-extensions
 werkzeug
 
 django-social-auth
+
+djangorestframework
+markdown
+pyyaml
+django-filter
