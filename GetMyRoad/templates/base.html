@@ -50,6 +50,7 @@
       {% block content %}
       {% endblock content %}
     </div>
+    <div id="spinner"></div>
 
     <script data-main="{{ STATIC_URL }}js/{{ debug|yesno:'main,amd-app' }}" src="{{ STATIC_URL }}js/vendor/require-min.js"></script>
   </body>

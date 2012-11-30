@@ -57,30 +57,55 @@ define([
             this.getMyLocation();
 
             //-- Set New Position
-            // map.on('click', function(data){
-            //     if (!user.get('isFigured')) {
-            //         self.position = L.marker(data.latlng).addTo(map);
-            //         self.updateUserCoordinates(data.latlng);
-            //     }
-            // });
-
-            var drawControl = new L.Control.Draw({
-                position: 'topleft',
-                polyline: false,
-                polygon: false,
-                circle: false,
-                rectangle: false
+            map.on('click', function(data){
+                if (!user.get('isFigured')) {
+                    self.position = L.marker(data.latlng).addTo(map);
+                    self.updateUserCoordinates(data.latlng);
+                }
             });
 
-            map.addControl(drawControl);
+            var setNewPosControl = self.createSetNewPosControl();
+            setNewPosControl.addTo(map)
 
-            map.on('draw:marker-created', function (e) {
-                e.marker.bindPopup('New position');
-                self.position = e.marker.addTo(map);
-                console.log(e)
+
+
+            map.on('click', function (data) {
+                if (!user.get('isFigured')) {
+                    self.position = L.marker(data.latlng).bindPopup('New position').addTo(map);
+                    self.updateUserCoordinates(data.latlng);
+                }
             });
 
         },
+
+        createSetNewPosControl: function() {
+            var self = this,
+                map = self.map;
+
+            var setNew = L.control({
+                position: 'topleft'
+            });
+
+            setNew.onAdd = function(map) {
+                var wrapper = L.DomUtil.create('div', 'leaflet-setnew-control-locate-wrap');
+                var link = L.DomUtil.create('a', 'leaflet-setnew-control-locate', wrapper);
+                link.href = '#';
+                link.id = '#set-new-pos'
+                link.title = 'Show me where I am';
+
+                L.DomEvent
+                    .on(link, 'click', L.DomEvent.stopPropagation)
+                    .on(link, 'click', L.DomEvent.preventDefault)
+                    .on(link, 'click', function() {
+                        self.setNewPosition()
+                    })
+
+                return wrapper;
+            };
+
+            return setNew;
+        },
+
 
         addCategories: function() {
           var coordinates = user.get('coordinates');
@@ -92,6 +117,12 @@ define([
             data: {
               "lat": coordinates.lat,
               "lng": coordinates.lng
+            },
+            beforeSend: function(){
+                $('#spinner').fadeToggle();
+            },
+            success: function() {
+                $('#spinner').fadeToggle();
             }
           }).then(function(contents) {
 
