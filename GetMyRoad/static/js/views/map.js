@@ -14,9 +14,13 @@ define([
 
         el: "#map-container",
 
-        events: {'click #set-new-pos': 'setNewPosition'},
+        events: {
+          'click #set-new-pos': 'setNewPosition'
+        },
 
         initialize: function() {
+            User.on('change:isFigured', this.updateMapControl, this);
+
             var self = this,
                 map = L.map('map', {
                     center: [50.451, 30.523],
@@ -29,42 +33,42 @@ define([
                 maxZoom: 18
             }).addTo(map);
 
-        //-- info block
-            var infoblock = L.control();
+            this.infoBlock = this.createInfoBlock();
+            this.infoBlock.addTo(map);
 
-            infoblock.onAdd = function (map) {
-                this._div = L.DomUtil.create('div', 'info'); // div with a class "info"
-                this.update();
-                return this._div;
-            };
+            //-- Find my location
+            this.getMyLocation();
 
-            //-- use self.infoblock.update(your_data_to_display);
-            infoblock.update = function (data) {
-                this._div.innerHTML = data ? data : 'Some info';
-            };
-
-            self.infoblock = infoblock;
-            self.infoblock.addTo(map);
-
-        //-- Find my location
-            self.getMyLocation();
-
-        //-- Set New Position
+            //-- Set New Position
             map.on('click', function(data){
                 if (!User.get('isFigured')) {
-
-                    self.position = L.marker(data.latlng).bindPopup("New Position").addTo(map);
-
+                    self.position = L.marker(data.latlng).addTo(map);
                     self.updateUserCoordinates(data.latlng);
-
-                    self.infoblock.update('you got new position!!!')
                 }
             });
         },
 
+        createInfoBlock: function() {
+          //-- info block
+          var infoBlock = L.control();
+
+          infoBlock.onAdd = function (map) {
+              this._div = L.DomUtil.create('div', 'info'); // div with a class "info"
+              this.update();
+              return this._div;
+          };
+
+          //-- use self.infoBlock.update(your_data_to_display);
+          infoBlock.update = function (data) {
+              this._div.innerHTML = data ? data : '';
+          };
+
+          return infoBlock;
+        },
+
         getMyLocation: function() {
             var self = this,
-                map = self.map;
+                map = this.map;
 
             map.locate({setView: true, maxZoom: 15});
 
@@ -89,14 +93,12 @@ define([
         },
 
         setNewPosition: function() {
-            var self = this;
 
-            self.map.removeLayer(self.position);
-            self.map.setZoom(10);
-            self.infoblock.update('put new marker position!!!')
+            this.map.removeLayer(this.position);
 
-            User.set({isFigured: false});
+            this.map.setZoom(10);
 
+            User.set({ isFigured: false });
         },
 
         updateUserCoordinates: function(coordinates) {
@@ -104,6 +106,14 @@ define([
                 coordinates: coordinates,
                 isFigured: true
             });
+        },
+
+        updateMapControl: function() {
+            if (User.get('isFigured')) {
+                this.infoBlock.update('Ready to find a road.');
+            } else {
+                this.infoBlock.update('Need to choose start position.');
+            }
         }
 
   });
