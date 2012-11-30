@@ -165,11 +165,6 @@ body {
     outline: 1px dotted #666;
 }
 
-.fb {
-    border-radius: 6px !important;
-    -webkit-border-radius: 6px !important;
-    -moz-border-radius: 6px !important;
-}
 
 .leaflet-setnew-locate-wrap {
     padding: 5px;

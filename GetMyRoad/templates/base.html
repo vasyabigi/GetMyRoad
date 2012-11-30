@@ -32,13 +32,15 @@
                 <button id="get_categories" class="fbbtn primary large alg"><i class="icon-th-list icon-white" style="margin-right: 10px"></i>Update categories</button>
                 <button id="find_places" class="fbbtn primary large alg" style="display: none;"><i class="icon-road icon-white" style="margin-right: 10px"></i>Get places</button>
             {% endif %}
-            <p class="navbar-text pull-right">
+
                 {% if request.user.is_authenticated %}
+            <p class="navbar-text pull-right">
                 Hi, {{ request.user.first_name }} {{ request.user.last_name }} <a href="{% url 'logout' %}">Logout</a>
-                {% else %}
-                <a rel="nofollow" class="fbbtn primary large fb" href="{% url 'socialauth_begin' 'facebook' %}">Login with Facebook</a>
-                {% endif %}
             </p>
+                {% else %}
+                <a rel="nofollow" class="fbbtn primary large alg" href="{% url 'socialauth_begin' 'facebook' %}"><i class="icon-thumbs-up icon-white" style="margin-right: 10px"></i>Login with Facebook</a>
+                {% endif %}
+
         </div>
       </div>
     </div>
