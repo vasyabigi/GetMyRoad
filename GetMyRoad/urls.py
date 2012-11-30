@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
-from core.views import home, logout, find_places, build_road
+from core.views import home, logout, find_places, build_road, select_categories
 
 admin.autodiscover()
 
@@ -12,7 +12,7 @@ urlpatterns = patterns('',
     url(r'', include('core.urls')),
     url(r'^$', home, name="home"),
     url(r'^find-places/$', find_places, name="find-places"),
-    url(r'^select-categories/$', find_places, name="select-categories"),
+    url(r'^select-categories/$', select_categories, name="select-categories"),
     url(r'^build-road/$', build_road, name="build-road"),
     url(r'^logout/$', logout, name='logout'),
 )

@@ -8,10 +8,14 @@ define([
   // Models
   'models/user',
   'collections/trip',
+  'collections/categories',
+
+  // Views
+  'views/categories',
 
   'vendor/csrf'
 
-], function($, _, Backbone, L, user, Trip) {
+], function($, _, Backbone, L, user, Trip, categories, CategoriesView) {
 
   var MapView = Backbone.View.extend({
 
@@ -19,18 +23,21 @@ define([
 
         events: {
           'click #set-new-pos': 'setNewPosition',
-          'click #find_places': 'fetchPlaces'
+          'click #find_places': 'fetchPlaces',
+          'click #get_categories': 'addCategories'
         },
 
         initialize: function() {
             user.on('change:isFigured', this.updateMapControl, this);
 
             var self = this,
+                categoriesView = new CategoriesView({ collection: categories }),
                 map = L.map('map', {
                     center: [50.451, 30.523],
                     zoom: 13
                 });
 
+            this.categoriesView = categoriesView;
             this.map = map;
 
             L.tileLayer('http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png', {
@@ -55,6 +62,33 @@ define([
                     self.updateUserCoordinates(data.latlng);
                 }
             });
+        },
+
+        addCategories: function() {
+          var coordinates = user.get('coordinates');
+          $.ajax({
+            type: "POST",
+            url: 'select-categories/',
+            async: false,
+            dataType: 'json',
+            data: {
+              "lat": coordinates.lat,
+              "lng": coordinates.lng
+            }
+          }).then(function(contents) {
+
+              var data = [];
+
+              $.each(contents.categories, function(i, e) {
+                  data[i] = {
+                    'name': e.name,
+                    'id': e.id
+                  };
+              });
+
+              categories.add(data);
+              user.set({"tripId": contents.trip_id });
+          });
         },
 
         createInfoBlock: function() {
@@ -94,7 +128,7 @@ define([
                     .on(link, 'click', L.DomEvent.preventDefault)
                     .on(link, 'click', function() {
                         self.getMyLocation();
-                    })
+                    });
 
                 return wrapper;
             };
@@ -121,7 +155,7 @@ define([
                         fillColor: 'green',
                         fillOpacity: 0.7,
                         radius: 4
-                    }
+                    };
 
                 user.set({currentPos: data.latlng});
 
@@ -138,6 +172,7 @@ define([
             map.on('locationerror', function() {
                 console.log('Enable to find your location');
             });
+
         },
 
         setNewPosition: function() {
@@ -165,9 +200,17 @@ define([
         },
 
         fetchPlaces: function() {
-            console.log(user.get('isGotTheRoad'));
 
             if (!user.get('isGotTheRoad')) {
+
+                var activatedCategories = [];
+                categories.each(function(category) {
+                  if (category.get('activated') === true) {
+                      activatedCategories.push(category.get('id'));
+                    }
+                });
+
+                console.log(activatedCategories);
 
                 var self = this,
                     coordinates = user.get('coordinates');
@@ -178,8 +221,8 @@ define([
                   async: false,
                   dataType: 'json',
                   data: {
-                    "lat": coordinates.lat,
-                    "lng": coordinates.lng
+                    "id": user.get('tripId'),
+                    "categories": activatedCategories
                   }
                 }).then(function(contents) {
                     var trip = new Trip(),
