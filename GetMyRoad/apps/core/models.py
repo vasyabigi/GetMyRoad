@@ -35,7 +35,7 @@ class Place(models.Model):
     price_range = models.CharField(blank=True, null=True, max_length=250)
     phone = models.CharField(blank=True, null=True, max_length=250)
     lat = models.FloatField('Lat')
-    lng = models.FloatField('Lng')
+    lon = models.FloatField('Lng')
 
     class Meta:
         ordering = ['rank']
@@ -53,7 +53,7 @@ class Trip(models.Model):
     user = models.ForeignKey(User, related_name="trips")
     categories = models.ManyToManyField(Category)
     lat = models.FloatField('Lat')
-    lng = models.FloatField('Lng')
+    lon = models.FloatField('Lng')
 
     RADIUS = 50000
 
@@ -68,7 +68,7 @@ class Trip(models.Model):
         path = 'https://graph.facebook.com/search?%s' % urllib.urlencode({
             'fields': 'id',
             'type': 'place',
-            'center': "%f,%f" % (self.lat, self.lng),
+            'center': "%f,%f" % (self.lat, self.lon),
             'distance': "%.0f" % self.RADIUS,
             'access_token': oauth_token,
             'limit': 500
@@ -109,7 +109,7 @@ class Trip(models.Model):
                     price_range=place_data['price_range'],
                     phone=place_data['phone'],
                     lat=place_data['location']['latitude'],
-                    lng=place_data['location']['longitude']
+                    lon=place_data['location']['longitude']
                 )
                 for cat_data in place_data['categories']:
                     cat, c = Category.objects.get_or_create(

@@ -23,7 +23,6 @@ def find_places(request):
     # Place for Anton job
 
     trip = Trip.objects.get(name="test")
-    import ipdb; ipdb.set_trace()
 
     context = {
         'places': places
