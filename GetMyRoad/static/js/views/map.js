@@ -114,6 +114,8 @@ define([
 
 
         addCategories: function() {
+
+          console.log('here');
           var self = this,
               coordinates = user.get('coordinates');
 
