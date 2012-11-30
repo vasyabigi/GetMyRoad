@@ -21,14 +21,10 @@ def logout(request):
 @api_view(['GET'])
 def select_categories(request):
     if request.user.is_authenticated():
-        start = parser.parse(request.GET.get('start', ''))
-        end = parser.parse(request.GET.get('end', ''))
         trip = Trip.objects.create(
             user=request.user,
             lat=float(request.GET['lat']),
-            lon=float(request.GET['lng']),
-            start=start,
-            end=end
+            lon=float(request.GET['lng'])
         )
         trip.fetch_places()
     return Response({
@@ -50,6 +46,9 @@ def find_places(request):
             user=request.user,
             id=float(request.GET['id']),
         )
+        trip.start = parser.parse(request.GET.get('start', ''))
+        trip.end = parser.parse(request.GET.get('end', ''))
+        trip.save()
         trip.find_route(set([int(el) for el in request.GET.getlist('categories[]')]))
 
         places = trip.points.values(

@@ -119,9 +119,6 @@ define([
 
         addCategories: function() {
 
-          var from = this.$('#fromTime'),
-              to = this.$('#toTime');
-
           var self = this,
               coordinates = user.get('coordinates');
 
@@ -132,9 +129,7 @@ define([
             dataType: 'json',
             data: {
               "lat": coordinates.lat,
-              "lng": coordinates.lng,
-              "start": from.val(),
-              "end": to.val()
+              "lng": coordinates.lng
             },
             beforeSend: function(){
                 $('#spinner').fadeIn();
@@ -259,6 +254,11 @@ define([
 
         fetchPlaces: function() {
 
+
+            var from = this.$('#fromTime'),
+                to = this.$('#toTime');
+
+
             this.clearObjects();
 
             var activatedCategories = [];
@@ -278,7 +278,9 @@ define([
               dataType: 'json',
               data: {
                 "id": user.get('tripId'),
-                "categories": activatedCategories
+                "categories": activatedCategories,
+                "start": from.val(),
+                "end": to.val()
               },
               beforeSend: function(){
                 $('#spinner').fadeIn();

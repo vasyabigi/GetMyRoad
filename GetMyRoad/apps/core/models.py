@@ -222,7 +222,7 @@ class Trip(models.Model):
         for cat in categories:
             # TODO: add distance filtering
             places[cat] = self.places.filter(categories=cat) \
-                .order_by('-rank')[:15]
+                .order_by('-rank')[:10]
         route, time = find(
             self.lat, self.lon, categories, places,
             self.start, self.end
