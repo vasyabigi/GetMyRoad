@@ -143,11 +143,16 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-LOGIN_URL = '/'
+SOCIAL_AUTH_EXPIRATION = 'expires'
+
+LOGIN_URL = '/login/facebook/'
 LOGIN_REDIRECT_URL = '/'
 LOGIN_ERROR_URL = '/'
 
-SOCIAL_AUTH_SESSION_EXPIRATION = False
+FACEBOOK_EXTENDED_PERMISSIONS = [
+    'offline_access'
+]
+
 # SOCIAL_AUTH_USER_MODEL = 'myapp.CustomUser'
 
 # For testing

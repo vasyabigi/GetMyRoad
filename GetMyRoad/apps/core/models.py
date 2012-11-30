@@ -227,7 +227,7 @@ class Trip(models.Model):
             self.lat, self.lon, categories, places,
             self.start, self.end
         )
-        self.estimated_time = unicode(time)
+        self.estimated_time = unicode(time - self.start)
         self.save()
         for point in route:
             TripPoint.objects.create(

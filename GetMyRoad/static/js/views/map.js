@@ -56,6 +56,9 @@ define([
             //-- Find my location
             this.getMyLocation();
 
+            this.markers = [];
+            this.polylines = [];
+
             //-- Set New Position
             map.on('click', function(data){
                 if (!user.get('isFigured')) {
@@ -114,17 +117,18 @@ define([
           $.ajax({
             type: "GET",
             url: 'select-categories/',
-            async: false,
+            async: true,
             dataType: 'json',
             data: {
               "lat": coordinates.lat,
               "lng": coordinates.lng
             },
             beforeSend: function(){
-                $('#spinner').fadeToggle();
+                $('#spinner').fadeIn();
             },
-            success: function() {
-                $('#spinner').fadeToggle();
+            complete: function() {
+                $('#spinner').fadeOut('slow');
+                $('#get_categories').hide();
             }
           }).then(function(contents) {
 
@@ -191,9 +195,13 @@ define([
 
         setNewPosition: function() {
 
+            this.clearObjects();
+            $('#get_categories').show();
+            $('#find_places').hide();
+
             this.map.removeLayer(this.position);
 
-            this.map.setZoom(10);
+            //this.map.setZoom(10);
 
             user.set({ isFigured: false });
         },
@@ -213,58 +221,76 @@ define([
             }
         },
 
+        clearObjects: function () {
+            for(var i in this.markers) {
+              this.map.removeLayer(this.markers[i]);
+            }
+            this.markers = [];
+
+            for(var i in this.polylines) {
+              this.map.removeLayer(this.polylines[i]);
+            }
+            this.polylines = [];
+        },
+
         fetchPlaces: function() {
 
-            if (!user.get('isGotTheRoad')) {
+            this.clearObjects();
 
-                var activatedCategories = [];
-                categories.each(function(category) {
-                  if (category.get('activated') === true) {
-                      activatedCategories.push(category.get('id'));
-                    }
+            var activatedCategories = [];
+            categories.each(function(category) {
+              if (category.get('activated') === true) {
+                  activatedCategories.push(category.get('id'));
+                }
+            });
+
+            var self = this,
+                coordinates = user.get('coordinates');
+
+            $.ajax({
+              type: "GET",
+              url: 'find-places/',
+              async: true,
+              dataType: 'json',
+              data: {
+                "id": user.get('tripId'),
+                "categories": activatedCategories
+              },
+              beforeSend: function(){
+                $('#spinner').fadeIn();
+              },
+              complete: function() {
+                  $('#spinner').fadeOut('slow');
+              }
+            }).then(function(contents) {
+                var trip = new Trip(),
+                    data = [];
+
+                trip.on('add', self.addPlaceMarker, self);
+
+                $.each(contents.places, function(i, e) {
+                    data[i] = {
+                      'order': i,
+                      'lat': e.place__lat,
+                      'lng': e.place__lon,
+                      'name': e.place__name,
+                      'id': e.place__id,
+                      'img': e.place__pic_small
+                    };
                 });
+                trip.add(data);
+                self.buildRoad(trip);
+                alert(contents.summary);
+            });
 
-                console.log(activatedCategories);
-
-                var self = this,
-                    coordinates = user.get('coordinates');
-
-                $.ajax({
-                  type: "GET",
-                  url: 'find-places/',
-                  async: false,
-                  dataType: 'json',
-                  data: {
-                    "id": user.get('tripId'),
-                    "categories": activatedCategories
-                  }
-                }).then(function(contents) {
-                    var trip = new Trip(),
-                        data = [];
-
-                    trip.on('add', self.addPlaceMarker, self);
-
-                    $.each(contents.places, function(i, e) {
-                        data[i] = {
-                          'order': i,
-                          'lat': e.place__lat,
-                          'lng': e.place__lon,
-                          'name': e.place__name,
-                          'id': e.place__id
-                        };
-                    });
-                    trip.add(data);
-                    self.buildRoad(trip);
-                    alert(contents.summary);
-                });
-
-                user.set({'isGotTheRoad': true });
-            }
+            user.set({'isGotTheRoad': true });
         },
 
         addPlaceMarker: function(place) {
-            console.log(place.toJSON());
-            L.marker(place.getLatLng()).bindPopup(place.get('name')).addTo(this.map);
+            var marker = L.marker(place.getLatLng()).bindPopup('<p>' + place.get('name') + '<img src="'+ place.get('img') + '"></p>');
+            this.markers.push(marker);
+            marker.addTo(this.map);
+            marker.openPopup();
         },
 
         buildRoad: function(trip) {
@@ -285,7 +311,6 @@ define([
         buildRoadPice: function(start, end) {
           var self = this;
 
-          console.log(this);
           var data = {
               "start_lat": start.lat,
               "start_lng": start.lng,
@@ -299,7 +324,9 @@ define([
               data: data,
               dataType: 'json'
           }).then(function(data) {
-              L.polyline(data.route_geometry, {color: 'blue'}).addTo(self.map);
+              var polyline = L.polyline(data.route_geometry, {color: 'blue'})
+              polyline.addTo(self.map);
+              self.polylines.push(polyline);
           });
         }
   });
