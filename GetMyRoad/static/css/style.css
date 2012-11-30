@@ -4,6 +4,7 @@ body, .container, .navbar{
     margin: 0;
     padding: 0;
     border: 0;
+    overflow: hidden;
 }
 
 .navbar{
@@ -196,6 +197,18 @@ body {
     background: white;
     width: 300px;
     height: 300px;
+    right: -250px;
+
+}
+.animated{
+    transition: right 0.5s;
+    -moz-transition: right 0.5s; /* Firefox 4 */
+    -webkit-transition: right 0.5s; /* Safari and Chrome */
+    -o-transition: right 0.5s; /* Opera */
+}
+
+.toggled{
+    right: 0px;
 }
 
 .sidebar-opener-wrapper{
@@ -203,8 +216,8 @@ body {
     width: 50px;
     height: 100%;
     display: block;
-    position: absolute;
-    margin-left: -50px;
+    float: left;
+    right: -250px;
 }
 
 .categories-wrapper{
@@ -212,5 +225,5 @@ body {
     display: block;
     width: 250px;
     height: 100%;
-    margin-left: 50px;
+    float: left;
 }
