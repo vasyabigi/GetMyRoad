@@ -32,6 +32,8 @@ define([
         initialize: function() {
             user.on('change:isFigured', this.updateMapControl, this);
 
+            L.Icon.Default.imagePath = 'static/js/vendor/images/';
+
             var self = this,
                 categoriesView = new CategoriesView({ collection: categories }),
                 map = L.map('map', {
